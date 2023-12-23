@@ -41,18 +41,20 @@ export default function Index() {
   const data = useLoaderData<typeof loader>();
 
   return (
-      <Command>
+    <div className="container">
+      <Command className="rounded-lg border shadow-md max-w-96">
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
-          <CommandEmpty>Search for books</CommandEmpty>
-          <CommandGroup heading='Results'>
+          {data.books.length === 0 && <CommandEmpty>Search for books</CommandEmpty>}
+          {data.books.length > 0 && <CommandGroup heading='Results'>
           {data.books.map((book) => (
             <CommandItem key={book.id}>
               <a href={book.volumeInfo.previewLink}>{book.volumeInfo.title}</a>
             </CommandItem>
           ))}
-          </CommandGroup>
+          </CommandGroup>}
         </CommandList>
       </Command>
+    </div>
   );
 }

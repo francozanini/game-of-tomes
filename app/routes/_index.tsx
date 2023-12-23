@@ -1,3 +1,4 @@
+import { Command, CommandInput, CommandItem, CommandEmpty, CommandGroup, CommandList  } from "@/components/ui/command";
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
@@ -40,18 +41,18 @@ export default function Index() {
   const data = useLoaderData<typeof loader>();
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <form method="GET" action='/'>
-        <input type="text" name="searchTerm" placeholder="Search for a book" />
-        <button type="submit">Search</button>
-      </form>
-      <ul>
-        {data.books.map((book) => (
-          <li key={book.id}>
-            <a href={book.volumeInfo.previewLink}>{book.volumeInfo.title}</a>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <Command>
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
+          <CommandEmpty>Search for books</CommandEmpty>
+          <CommandGroup heading='Results'>
+          {data.books.map((book) => (
+            <CommandItem key={book.id}>
+              <a href={book.volumeInfo.previewLink}>{book.volumeInfo.title}</a>
+            </CommandItem>
+          ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
   );
 }

@@ -1,7 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { Outlet } from "@remix-run/react";
+import {
+  SignInButton,
+  SignOutButton,
+  SignUpButton,
+  useAuth,
+  useUser,
+} from "@clerk/remix";
+import { Link, Outlet } from "@remix-run/react";
 
 export default function IndexLayout() {
+  const { isSignedIn } = useUser();
+
   return (
     <>
       <nav className="container flex flex-row justify-between border-b border-border/40 p-4 px-8">
@@ -16,8 +25,20 @@ export default function IndexLayout() {
             </a>
           </div>
         </div>
-        <div>
-          <a className="text-sm font-semibold text-muted-foreground">Login</a>
+        <div className="flex flex-row gap-2">
+          {/* <Link
+            to="/signin"
+            className="text-sm font-semibold text-muted-foreground"
+          >
+            Sign in
+          </Link>
+          <Link
+            to="/signup"
+            className="text-sm font-semibold text-muted-foreground"
+          >
+            Sign up
+          </Link> */}
+          {isSignedIn ? <SignOutButton /> : <SignInButton mode="modal" />}
         </div>
       </nav>
       <Outlet />

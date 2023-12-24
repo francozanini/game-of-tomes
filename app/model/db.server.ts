@@ -1,17 +1,21 @@
 import { Database } from "./schema.server";
-import { Pool } from "pg";
+import Pool from "pg-pool";
 import { Kysely, PostgresDialect } from "kysely";
+import { singleton } from "~/utils/singleton.server";
 
-const dialect = new PostgresDialect({
-  pool: new Pool({
-    database: "test",
-    host: "localhost",
-    user: "admin",
-    port: 5434,
-    max: 10,
-  }),
-});
+export const db = singleton("db", () => {
+  const dialect = new PostgresDialect({
+    pool: new Pool({
+      database: "game_of_tomes",
+      host: "localhost",
+      user: "admin",
+      password: "S3cret",
+      port: 5432,
+      max: 10,
+    }),
+  });
 
-export const db = new Kysely<Database>({
-  dialect,
+  return new Kysely<Database>({
+    dialect,
+  });
 });

@@ -6,13 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Command,
-  CommandInput,
-  CommandItem,
-  CommandGroup,
-  CommandList,
-} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import {
   ResizableHandle,
@@ -120,9 +113,9 @@ export default function Index() {
   return (
     <ResizablePanelGroup
       direction="horizontal"
-      className="m-4 flex flex-row gap-4"
+      className="mx-4 flex flex-row gap-4"
     >
-      <ResizablePanel defaultSize={20} className="flex flex-col gap-2">
+      <ResizablePanel defaultSize={20} className="flex flex-col gap-2 pt-4">
         <form method="get" className="flex flex-row gap-2">
           <Input
             type="text"
@@ -161,7 +154,7 @@ export default function Index() {
         ))}
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel>
+      <ResizablePanel className="pt-4">
         <h2 className="text-xl font-bold">Selected Books</h2>
         <div className="flex flex-row gap-4">
           {selectedBooks.map((book) => (

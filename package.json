@@ -4,12 +4,12 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "remix build",
-    "dev": "remix dev --manual",
+    "dev": "remix vite:dev",
+    "build": "remix vite:build",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve ./build/index.js",
+    "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
-    "migrate": "tsx ./app/model/migrator.ts"
+    "migrate": "tsx ./app/model/migrator.server.ts"
   },
   "dependencies": {
     "@clerk/remix": "^3.1.13",
@@ -27,14 +27,14 @@
     "isbot": "^3.6.8",
     "kysely": "^0.26.3",
     "lucide-react": "^0.300.0",
-    "pg": "^8.11.3",
     "pg-pool": "^3.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-resizable-panels": "^1.0.4",
     "svix": "^1.15.0",
     "tailwind-merge": "^2.2.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.4.1",

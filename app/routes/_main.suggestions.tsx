@@ -12,13 +12,21 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
+  defer,
   json,
   type LoaderFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
-import { useState } from "react";
+import {
+  Await,
+  Form,
+  useLoaderData,
+  useNavigation,
+  useSearchParams,
+} from "@remix-run/react";
+import { Suspense, useState } from "react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -37,10 +45,12 @@ export async function loader(args: LoaderFunctionArgs) {
 
   const response = await fetch(
     `https://www.googleapis.com/books/v1/volumes?q=${searchTerm}&maxResults=40&printType=books`,
-  ).then((res) => res.json() as Promise<BooksResponse>);
+  )
+    .then((res) => res.json() as Promise<BooksResponse>)
+    .then((res) => uniqueByTitleAndAuthor(res.items).slice(0, 5));
 
   return json({
-    books: uniqueByTitleAndAuthor(response.items).slice(0, 5),
+    books: response,
   });
 }
 
@@ -89,10 +99,11 @@ type BooksResponse = {
 };
 
 export default function Index() {
-  const data = useLoaderData<typeof loader>();
+  const { books } = useLoaderData<typeof loader>();
   const [params] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(params.get("searchTerm") ?? "");
   const [selectedBooks, setSelectedBooks] = useState<Book[]>([]);
+  const { state: navigationState } = useNavigation();
 
   function toggleBook(book: Book) {
     setSelectedBooks((books) => {
@@ -104,13 +115,19 @@ export default function Index() {
     });
   }
 
+  console.log(navigationState);
+
   return (
     <ResizablePanelGroup
       direction="horizontal"
       className="mx-4 flex flex-row gap-4"
     >
       <ResizablePanel defaultSize={20} className="flex flex-col gap-2 pt-4">
-        <form method="get" className="flex flex-row gap-2">
+        <Form
+          method="get"
+          className="flex flex-row gap-2"
+          action="/suggestions"
+        >
           <Input
             type="text"
             name="searchTerm"
@@ -118,34 +135,42 @@ export default function Index() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <Button type="submit">Search</Button>
-        </form>
-        {data.books.map((book) => (
-          <Card key={book.id} className="flex flex-row gap-2">
-            <img
-              src={
-                book.volumeInfo.imageLinks?.smallThumbnail ||
-                "https://placeholder.co/128x194"
-              }
-              alt={book.volumeInfo.title}
-              className="h-22 w-16"
-            />
-            <aside className="flex flex-col gap-2">
-              <span className="font-semibold">{book.volumeInfo.title}</span>
-              <span className="text-sm text-muted-foreground">
-                by {book.volumeInfo.authors?.join(", ")}
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                title="Add"
-                className="self-start"
-                onClick={() => toggleBook(book)}
-              >
-                {selectedBooks.includes(book) ? "Remove" : "Add"}
-              </Button>
-            </aside>
-          </Card>
-        ))}
+        </Form>
+        {navigationState === "loading" || navigationState === "submitting" ? (
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-28 w-auto" />
+            <Skeleton className="h-28 w-auto" />
+            <Skeleton className="h-28 w-auto" />
+          </div>
+        ) : (
+          books.map((book) => (
+            <Card key={book.id} className="flex flex-row gap-2">
+              <img
+                src={
+                  book.volumeInfo.imageLinks?.smallThumbnail ||
+                  "https://placeholder.co/128x194"
+                }
+                alt={book.volumeInfo.title}
+                className="h-22 w-16"
+              />
+              <aside className="flex flex-col gap-2">
+                <span className="font-semibold">{book.volumeInfo.title}</span>
+                <span className="text-sm text-muted-foreground">
+                  by {book.volumeInfo.authors?.join(", ")}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  title="Add"
+                  className="self-start"
+                  onClick={() => toggleBook(book)}
+                >
+                  {selectedBooks.includes(book) ? "Remove" : "Add"}
+                </Button>
+              </aside>
+            </Card>
+          ))
+        )}
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel className="pt-4" defaultSize={80}>

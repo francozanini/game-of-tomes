@@ -1,4 +1,4 @@
-import { UserTable } from "./userSchema.server";
+import { UserTable } from "./userSchema";
 
 export interface Database {
   user: UserTable;

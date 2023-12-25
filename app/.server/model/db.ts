@@ -1,8 +1,7 @@
-import { Database } from "./schemas/schema.server";
+import { Database } from "./schemas/schema";
 import Pool from "pg-pool";
 import { Kysely, PostgresDialect } from "kysely";
 import { singleton } from "~/utils/singleton.server";
-
 
 function createKyselyPostgres() {
   const dialect = new PostgresDialect({
@@ -20,4 +19,4 @@ function createKyselyPostgres() {
   });
 }
 
-export const db = singleton('db', () => createKyselyPostgres());
+export const db = singleton("db", () => createKyselyPostgres());

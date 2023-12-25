@@ -1,7 +1,7 @@
 import * as path from "path";
 import { promises as fs } from "fs";
-import { Migrator, FileMigrationProvider } from "kysely";
-import { db } from "./db.server";
+import { FileMigrationProvider, Migrator } from "kysely";
+import { db } from "./db";
 
 async function migrateToLatest() {
   const __dirname = path.dirname(new URL(import.meta.url).pathname);

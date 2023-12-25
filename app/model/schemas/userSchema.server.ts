@@ -9,7 +9,6 @@ import type {
 export interface UserTable {
   id: Generated<number>;
   externalId: string;
-  name: string;
   username: string;
   email: string;
   imageUrl: string | null;

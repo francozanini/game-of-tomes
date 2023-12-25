@@ -9,7 +9,7 @@ const env = () => ({
 });
 
 export async function action({ request }: ActionFunctionArgs) {
-  console.log("request", request);
+  console.log("request", JSON.stringify(request));
 
   if (!env().webhookSecret) {
     throw new Error("Missing webhook secret");
@@ -30,26 +30,35 @@ export async function action({ request }: ActionFunctionArgs) {
   console.log(body)
 
   const data = body.data;
+  const firstEmail = data.email_addresses[0].email_address;
 
   if (body.type === "user.created") {
     await createUser({
       externalId: data.id,
-      email: data.email,
-      username: data.username,
-      name: `${data.firstName} ${data.lastName}`,
+      email: firstEmail,
+      username: data.username || firstEmail,
+      imageUrl: data.image_url
     });
     console.log('created user')
   } else if (body.type === "user.updated") {
     await updateUser(data.id, {
-      email: data.email,
-      username: data.username,
-      name: `${data.firstName} ${data.lastName}`,
+      email: firstEmail,
+      username: data.username || firstEmail,
+      imageUrl: data.image_url
     });
+    console.log('updated user')
   } else if (body.type === "user.deleted") {
     await deleteUser(data.id);
+    console.log('deleted user')
   } else throw new Error("Unknown event type");
 
   return new Response("ok", { status: 200 });
+}
+
+
+type EmailAddress = {
+  id: string;
+  email_address: string;
 }
 
 type UserCreatedEvent = {
@@ -57,10 +66,11 @@ type UserCreatedEvent = {
   type: "user.created";
   data: {
     id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    email_addresses: EmailAddress[];
+    firstName: string | undefined;
+    lastName: string | undefined;
+    username: string | null;
+    image_url: string | null;
     phoneNumber: string;
     phoneNumberVerified: boolean;
     emailVerified: boolean;
@@ -78,12 +88,13 @@ type UserUpdatedEvent = {
   type: "user.updated";
   data: {
     id: string;
-    email: string;
+    email_addresses: EmailAddress[];
     firstName: string;
     lastName: string;
     username: string;
     phoneNumber: string;
     phoneNumberVerified: boolean;
+    image_url: string | null;
     emailVerified: boolean;
     createdAt: string;
     updatedAt: string;
@@ -99,11 +110,12 @@ type UserDeletedEvent = {
   type: "user.deleted";
   data: {
     id: string;
-    email: string;
+    email_addresses: EmailAddress[];
     firstName: string;
     lastName: string;
     username: string;
     phoneNumber: string;
+    image_url: string | null;
     phoneNumberVerified: boolean;
     emailVerified: boolean;
     createdAt: string;

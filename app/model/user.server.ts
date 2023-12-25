@@ -2,7 +2,6 @@ import { db } from "./db.server";
 import { NewUser, UserUpdate } from "./schemas/userSchema.server";
 
 export function createUser(newUser: NewUser) {
-  console.log('creating user');
   return db.insertInto("user").values(newUser).execute();
 }
 

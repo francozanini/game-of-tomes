@@ -1,7 +1,6 @@
 import { ClerkApp, ClerkErrorBoundary } from "@clerk/remix";
 import { rootAuthLoader } from "@clerk/remix/ssr.server";
-import { cssBundleHref } from "@remix-run/css-bundle";
-import type { LinksFunction, LoaderFunction } from "@remix-run/node";
+import type { LoaderFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -10,12 +9,8 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import stylesheet from "~/globals.css";
+import  "~/globals.css";
 
-export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: stylesheet },
-  ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
-];
 
 export const loader: LoaderFunction = (args) => rootAuthLoader(args);
 
@@ -23,6 +18,7 @@ function App() {
   return (
     <html lang="en">
       <head>
+        <title>game.of.tomes</title>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />

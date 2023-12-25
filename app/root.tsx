@@ -27,7 +27,7 @@ function App() {
         <Links />
         <NonFlashOfWrongThemeEls />
       </head>
-      <body className="min-h-screen">
+      <body className="h-screen min-h-screen">
         <Outlet />
         <ScrollRestoration />
         <Scripts />

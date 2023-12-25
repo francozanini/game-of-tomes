@@ -14,19 +14,18 @@ import {
 } from "@/components/ui/resizable";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  defer,
   json,
   type LoaderFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node";
 import {
-  Await,
   Form,
   useLoaderData,
   useNavigation,
   useSearchParams,
 } from "@remix-run/react";
-import { Suspense, useState } from "react";
+import { useState } from "react";
+import { Book, fetchBooks } from "~/.server/google-books/api";
 
 export const meta: MetaFunction = () => {
   return [
@@ -43,60 +42,12 @@ export async function loader(args: LoaderFunctionArgs) {
     return json({ books: [] });
   }
 
-  const response = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?q=${searchTerm}&maxResults=40&printType=books`,
-  )
-    .then((res) => res.json() as Promise<BooksResponse>)
-    .then((res) => uniqueByTitleAndAuthor(res.items).slice(0, 5));
+  const response = await fetchBooks(searchTerm);
 
   return json({
     books: response,
   });
 }
-
-function uniqueByTitleAndAuthor(books: Book[]) {
-  const uniqueBooks = new Map<string, Book>();
-
-  for (const book of books) {
-    const key = `${book.volumeInfo.title} ${book.volumeInfo.authors?.join(
-      ", ",
-    )}`;
-    uniqueBooks.set(key, book);
-  }
-
-  return Array.from(uniqueBooks.values());
-}
-
-type Book = {
-  id: string;
-  volumeInfo: {
-    title: string;
-    previewLink: string;
-    imageLinks: {
-      extraLarge: string;
-      large: string;
-      small: string;
-      medium: string;
-      thumbnail: string;
-      smallThumbnail: string;
-    } | null;
-    authors: string[] | null;
-    industryIdentifiers: {
-      type: string;
-      identifier: string;
-    }[];
-  };
-  language: string;
-  saleInfo: {
-    country: string;
-    saleability: string;
-    isEbook: boolean;
-  };
-};
-
-type BooksResponse = {
-  items: Book[];
-};
 
 export default function Index() {
   const { books } = useLoaderData<typeof loader>();
@@ -114,8 +65,6 @@ export default function Index() {
       }
     });
   }
-
-  console.log(navigationState);
 
   return (
     <ResizablePanelGroup

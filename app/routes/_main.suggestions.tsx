@@ -17,13 +17,7 @@ import {
   type LoaderFunctionArgs,
   type MetaFunction,
 } from "@remix-run/node";
-import {
-  Form,
-  useFetcher,
-  useLoaderData,
-  useSearchParams,
-  useSubmit,
-} from "@remix-run/react";
+import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { useState } from "react";
 
 export const meta: MetaFunction = () => {
@@ -154,7 +148,7 @@ export default function Index() {
         ))}
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel className="pt-4">
+      <ResizablePanel className="pt-4" defaultSize={80}>
         <h2 className="text-xl font-bold">Selected Books</h2>
         <div className="flex flex-row gap-4">
           {selectedBooks.map((book) => (
@@ -175,7 +169,11 @@ export default function Index() {
               </CardHeader>
               <CardFooter className="flex gap-2">
                 <Button type="button" title="Preview" variant="secondary">
-                  <a href={book.volumeInfo.previewLink} target="_blank">
+                  <a
+                    href={book.volumeInfo.previewLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Preview
                   </a>
                 </Button>

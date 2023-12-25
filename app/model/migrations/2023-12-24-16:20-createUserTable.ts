@@ -5,6 +5,8 @@ export async function up(kysely: Kysely<any>) {
     .createTable("user")
     .ifNotExists()
     .addColumn("id", "serial", (col) => col.primaryKey())
+    .addColumn("externalId", "varchar", (col) => col.notNull().unique())
+    .addColumn("deleted", "boolean", (col) => col.notNull().defaultTo(false))
     .addColumn("name", "varchar", (col) => col.notNull())
     .addColumn("username", "varchar", (col) => col.notNull())
     .addColumn("email", "varchar", (col) => col.notNull())

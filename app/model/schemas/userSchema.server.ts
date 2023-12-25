@@ -1,14 +1,21 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import type {
+  ColumnType,
+  Generated,
+  Insertable,
+  Selectable,
+  Updateable,
+} from "kysely";
 
 export interface UserTable {
   id: Generated<number>;
+  externalId: string;
   name: string;
   username: string;
   email: string;
-  password: string;
   imageUrl: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  deleted: ColumnType<boolean, boolean | undefined, boolean>;
+  createdAt: ColumnType<Date, string | undefined, never>;
+  updatedAt: ColumnType<Date, string | undefined, never>;
 }
 
 export type User = Selectable<UserTable>;

@@ -1,16 +1,23 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import { db } from "./db.server";
+import { NewUser, UserUpdate } from "./schemas/userSchema.server";
 
-export interface UserTable {
-  id: Generated<number>;
-  name: string;
-  username: string;
-  email: string;
-  password: string;
-  imageUrl: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+export function createUser(newUser: NewUser) {
+  console.log('creating user');
+  return db.insertInto("user").values(newUser).execute();
 }
 
-export type User = Selectable<UserTable>;
-export type NewUser = Insertable<UserTable>;
-export type UserUpdate = Updateable<UserTable>;
+export function updateUser(id: string, updatedUser: UserUpdate) {
+  return db
+    .updateTable("user")
+    .set(updatedUser)
+    .where("externalId", "==", id)
+    .execute();
+}
+
+export function deleteUser(id: string) {
+  return db
+    .updateTable("user")
+    .set({ deleted: true })
+    .where("externalId", "==", id)
+    .execute();
+}

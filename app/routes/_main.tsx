@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import {
-  SignInButton,
-  SignOutButton,
-  SignUpButton,
-  useAuth,
-  useUser,
-} from "@clerk/remix";
-import { Link, Outlet } from "@remix-run/react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SignInButton, SignOutButton, useUser } from "@clerk/remix";
+import { Outlet } from "@remix-run/react";
+import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { Theme, useTheme } from "~/theme";
 
 export default function IndexLayout() {
   const { isSignedIn } = useUser();
@@ -26,22 +28,38 @@ export default function IndexLayout() {
           </div>
         </div>
         <div className="flex flex-row gap-2">
-          {/* <Link
-            to="/signin"
-            className="text-sm font-semibold text-muted-foreground"
-          >
-            Sign in
-          </Link>
-          <Link
-            to="/signup"
-            className="text-sm font-semibold text-muted-foreground"
-          >
-            Sign up
-          </Link> */}
           {isSignedIn ? <SignOutButton /> : <SignInButton mode="modal" />}
+          <ThemeChanger />
         </div>
       </nav>
       <Outlet />
     </>
+  );
+}
+
+function ThemeChanger() {
+  const [, setTheme] = useTheme();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="w-9 px-0">
+          <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme(() => Theme.LIGHT)}>
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme(() => Theme.DARK)}>
+          Dark
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme(() => Theme.DARK)}>
+          System
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -7,12 +7,19 @@
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
   root: true,
+  rules: {
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-uses-react": "off",
+  },
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
     ecmaFeatures: {
       jsx: true,
     },
+  },
+  settings:{
+    "import/internal-regex": "^~/",
   },
   env: {
     browser: true,
@@ -33,8 +40,6 @@ module.exports = {
         "plugin:react/jsx-runtime",
         "plugin:react-hooks/recommended",
         "plugin:jsx-a11y/recommended",
-        'plugin:react/recommended',
-        'plugin:prettier/recommended',
       ],
       settings: {
         react: {
@@ -55,11 +60,15 @@ module.exports = {
       parser: "@typescript-eslint/parser",
       settings: {
         "import/internal-regex": "^~/",
+        "import/parsers": {
+          "@typescript-eslint/parser": [".ts", ".tsx"],
+        },
         "import/resolver": {
           node: {
             extensions: [".ts", ".tsx"],
           },
           typescript: {
+            project: "./tsconfig.json",
             alwaysTryTypes: true,
           },
         },

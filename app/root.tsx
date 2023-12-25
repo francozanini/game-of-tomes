@@ -9,22 +9,25 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import  "~/globals.css";
-
+import "~/globals.css";
+import { NonFlashOfWrongThemeEls, ThemeProvider, useTheme } from "~/theme";
+import { clsx } from "clsx";
 
 export const loader: LoaderFunction = (args) => rootAuthLoader(args);
 
 function App() {
+  const [theme] = useTheme();
   return (
-    <html lang="en">
+    <html lang="en" className={clsx(theme)}>
       <head>
         <title>game.of.tomes</title>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <NonFlashOfWrongThemeEls />
       </head>
-      <body className="dark h-screen">
+      <body className="h-screen">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
@@ -34,6 +37,14 @@ function App() {
   );
 }
 
+function AppWithProviders() {
+  return (
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  );
+}
+
 export const ErrorBoundary = ClerkErrorBoundary();
 
-export default ClerkApp(App);
+export default ClerkApp(AppWithProviders);

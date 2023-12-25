@@ -1,4 +1,4 @@
-import { Database } from "./schemas/schema";
+import { Database } from "~/.server/model/tables/schema";
 import Pool from "pg-pool";
 import { Kysely, PostgresDialect } from "kysely";
 import { singleton } from "~/utils/singleton.server";

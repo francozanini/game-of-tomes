@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { NewUser, UserUpdate } from "./schemas/userSchema";
+import { NewUser, UserUpdate } from "~/.server/model/tables/userSchema";
 
 export function createUser(newUser: NewUser) {
   return db.insertInto("user").values(newUser).execute();

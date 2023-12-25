@@ -1,7 +1,7 @@
 import { WebhookEvent } from "@clerk/remix/api.server";
 import { ActionFunctionArgs } from "@remix-run/node";
 import { Webhook } from "svix";
-import { createUser, deleteUser, updateUser } from "~/model/user.server";
+import { createUser, deleteUser, updateUser } from "~/.server/model/user";
 
 const env = () => ({
   webhookSecret: process.env.WEBHOOK_SECRET!,
@@ -27,7 +27,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const body = (await request.json()) as UserEvent;
 
-  console.log(body)
+  console.log(body);
 
   const data = body.data;
   const firstEmail = data.email_addresses[0].email_address;
@@ -37,29 +37,28 @@ export async function action({ request }: ActionFunctionArgs) {
       externalId: data.id,
       email: firstEmail,
       username: data.username || firstEmail,
-      imageUrl: data.image_url
+      imageUrl: data.image_url,
     });
-    console.log('created user')
+    console.log("created user");
   } else if (body.type === "user.updated") {
     await updateUser(data.id, {
       email: firstEmail,
       username: data.username || firstEmail,
-      imageUrl: data.image_url
+      imageUrl: data.image_url,
     });
-    console.log('updated user')
+    console.log("updated user");
   } else if (body.type === "user.deleted") {
     await deleteUser(data.id);
-    console.log('deleted user')
+    console.log("deleted user");
   } else throw new Error("Unknown event type");
 
   return new Response("ok", { status: 200 });
 }
 
-
 type EmailAddress = {
   id: string;
   email_address: string;
-}
+};
 
 type UserCreatedEvent = {
   object: "event";

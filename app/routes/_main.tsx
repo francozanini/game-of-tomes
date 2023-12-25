@@ -15,10 +15,10 @@ export default function IndexLayout() {
 
   return (
     <>
-      <nav className="container flex flex-row justify-between border-b border-border/40 p-4 px-8">
-        <div className="flex flex-row gap-4">
-          <h1 className="font-bold">game.of.tomes</h1>
-          <div className="flex flex-row items-center">
+      <header className="border-b border-border/40">
+        <div className="container flex max-w-screen-2xl flex-row items-center justify-between">
+          <div className="flex h-14 flex-row items-center gap-4">
+            <h1 className="font-bold">game.of.tomes</h1>
             <a
               href="/clubs"
               className="text-sm font-semibold text-muted-foreground"
@@ -26,12 +26,12 @@ export default function IndexLayout() {
               Clubs
             </a>
           </div>
+          <div className="flex flex-row gap-2">
+            {isSignedIn ? <SignOutButton /> : <SignInButton mode="modal" />}
+            <ThemeChanger />
+          </div>
         </div>
-        <div className="flex flex-row gap-2">
-          {isSignedIn ? <SignOutButton /> : <SignInButton mode="modal" />}
-          <ThemeChanger />
-        </div>
-      </nav>
+      </header>
       <Outlet />
     </>
   );

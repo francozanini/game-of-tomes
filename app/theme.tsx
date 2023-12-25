@@ -16,10 +16,10 @@ const getPreferredTheme = () =>
 
 function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme | null>(() => {
-    if (typeof window !== "undefined") {
-      return getPreferredTheme();
+    if (typeof window !== "object") {
+      return null;
     }
-    return Theme.LIGHT;
+    return getPreferredTheme();
   });
 
   return (

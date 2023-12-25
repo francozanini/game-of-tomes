@@ -49,10 +49,133 @@ export async function loader(args: LoaderFunctionArgs) {
   });
 }
 
+function SkeletonList() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Skeleton className="h-28 w-auto" />
+      <Skeleton className="h-28 w-auto" />
+      <Skeleton className="h-28 w-auto" />
+    </div>
+  );
+}
+
+function BooksSearchResults({
+  books,
+  onSelected,
+  booksAlreadySelected = [],
+}: {
+  books: Book[];
+  onSelected: (book: Book) => void;
+  booksAlreadySelected?: Book[];
+}) {
+  return (
+    <>
+      {books.map((book) => (
+        <Card key={book.id} className="flex flex-row gap-2">
+          <img
+            src={
+              book.volumeInfo.imageLinks?.smallThumbnail ||
+              "https://placeholder.co/128x194"
+            }
+            alt={book.volumeInfo.title}
+            className="h-22 w-16"
+          />
+          <aside className="flex flex-col gap-2">
+            <span className="font-semibold">{book.volumeInfo.title}</span>
+            <span className="text-sm text-muted-foreground">
+              by {book.volumeInfo.authors?.join(", ")}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              title="Add"
+              className="self-start"
+              onClick={() => onSelected(book)}
+            >
+              {booksAlreadySelected.includes(book) ? "Remove" : "Add"}
+            </Button>
+          </aside>
+        </Card>
+      ))}
+    </>
+  );
+}
+
+function SearchBar({ initialSearchTerm }: { initialSearchTerm: string }) {
+  return (
+    <Form method="get" className="flex flex-row gap-2" action="/suggestions">
+      <Input type="text" name="searchTerm" defaultValue={initialSearchTerm} />
+      <Button type="submit">Search</Button>
+    </Form>
+  );
+}
+
+function BookCard({
+  book: { volumeInfo },
+  onSelected,
+}: {
+  book: Book;
+  onSelected: () => void;
+}) {
+  return (
+    <Card>
+      <img
+        src={
+          volumeInfo.imageLinks?.thumbnail || "https://placeholder.co/128x194"
+        }
+        alt={volumeInfo.title}
+        className="m-auto my-2"
+      />
+      <CardHeader>
+        <CardTitle>{volumeInfo.title}</CardTitle>
+        <CardDescription>by {volumeInfo.authors?.join(", ")}</CardDescription>
+      </CardHeader>
+      <CardFooter className="flex gap-2">
+        <Button type="button" title="Preview" variant="secondary">
+          <a
+            href={volumeInfo.previewLink}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Preview
+          </a>
+        </Button>
+        <Button
+          type="button"
+          variant="destructive"
+          title="Remove"
+          onClick={onSelected}
+        >
+          Remove
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+function BookCardList({
+  books,
+  onSelected,
+}: {
+  books: Book[];
+  onSelected: (book: Book) => void;
+}) {
+  return (
+    <div className="flex flex-row gap-4">
+      {books.map((book) => (
+        <BookCard
+          key={book.id}
+          book={book}
+          onSelected={() => onSelected(book)}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function Index() {
   const { books } = useLoaderData<typeof loader>();
   const [params] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState(params.get("searchTerm") ?? "");
   const [selectedBooks, setSelectedBooks] = useState<Book[]>([]);
   const { state: navigationState } = useNavigation();
 
@@ -66,103 +189,33 @@ export default function Index() {
     });
   }
 
+  const booksLoading =
+    navigationState === "loading" || navigationState === "submitting";
+
   return (
     <ResizablePanelGroup
       direction="horizontal"
       className="mx-4 flex flex-row gap-4"
     >
       <ResizablePanel defaultSize={20} className="flex flex-col gap-2 pt-4">
-        <Form
-          method="get"
-          className="flex flex-row gap-2"
-          action="/suggestions"
-        >
-          <Input
-            type="text"
-            name="searchTerm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Button type="submit">Search</Button>
-        </Form>
-        {navigationState === "loading" || navigationState === "submitting" ? (
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-28 w-auto" />
-            <Skeleton className="h-28 w-auto" />
-            <Skeleton className="h-28 w-auto" />
-          </div>
+        <SearchBar initialSearchTerm={params.get("searchTerm") || ""} />
+        {booksLoading ? (
+          <SkeletonList />
         ) : (
-          books.map((book) => (
-            <Card key={book.id} className="flex flex-row gap-2">
-              <img
-                src={
-                  book.volumeInfo.imageLinks?.smallThumbnail ||
-                  "https://placeholder.co/128x194"
-                }
-                alt={book.volumeInfo.title}
-                className="h-22 w-16"
-              />
-              <aside className="flex flex-col gap-2">
-                <span className="font-semibold">{book.volumeInfo.title}</span>
-                <span className="text-sm text-muted-foreground">
-                  by {book.volumeInfo.authors?.join(", ")}
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  title="Add"
-                  className="self-start"
-                  onClick={() => toggleBook(book)}
-                >
-                  {selectedBooks.includes(book) ? "Remove" : "Add"}
-                </Button>
-              </aside>
-            </Card>
-          ))
+          <BooksSearchResults
+            books={books}
+            onSelected={toggleBook}
+            booksAlreadySelected={selectedBooks}
+          />
         )}
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel className="pt-4" defaultSize={80}>
         <h2 className="text-xl font-bold">Selected Books</h2>
-        <div className="flex flex-row gap-4">
-          {selectedBooks.map((book) => (
-            <Card key={book.id}>
-              <img
-                src={
-                  book.volumeInfo.imageLinks?.thumbnail ||
-                  "https://placeholder.co/128x194"
-                }
-                alt={book.volumeInfo.title}
-                className="m-auto my-2"
-              />
-              <CardHeader>
-                <CardTitle>{book.volumeInfo.title}</CardTitle>
-                <CardDescription>
-                  by {book.volumeInfo.authors?.join(", ")}
-                </CardDescription>
-              </CardHeader>
-              <CardFooter className="flex gap-2">
-                <Button type="button" title="Preview" variant="secondary">
-                  <a
-                    href={book.volumeInfo.previewLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Preview
-                  </a>
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  title="Remove"
-                  onClick={() => toggleBook(book)}
-                >
-                  Remove
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        <BookCardList
+          books={selectedBooks}
+          onSelected={(book) => toggleBook(book)}
+        />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

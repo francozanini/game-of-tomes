@@ -8,10 +8,10 @@ import {
 } from "~/.server/model/tables/clubAndVotesTables";
 
 export interface Database {
-  user: UserTable;
-  club: ClubTable;
-  suggestion: BookSuggestionTable;
-  bookSelection: BookSelectionTable;
-  members: ClubMemberTable;
+  users: UserTable;
+  clubs: ClubTable;
+  bookSuggestions: BookSuggestionTable;
+  bookSelections: BookSelectionTable;
+  clubMembers: ClubMemberTable;
   votes: VotesTable;
 }

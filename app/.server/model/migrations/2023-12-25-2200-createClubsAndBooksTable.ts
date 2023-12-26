@@ -22,7 +22,9 @@ export async function up(kysely: Kysely<any>) {
     .createTable("clubMembers")
     .ifNotExists()
     .addColumn("clubId", "integer", (col) => col.notNull())
-    .addColumn("userId", "integer", (col) => col.notNull())
+    .addColumn("userId", "varchar", (col) => col.notNull())
+    .addForeignKeyConstraint("clubIdConstraint", ["clubId"], "clubs", ["id"])
+    .addForeignKeyConstraint("userIdConstraint", ["userId"], "user", ["id"])
     .execute();
 
   await kysely.schema
@@ -42,7 +44,7 @@ export async function up(kysely: Kysely<any>) {
     .execute();
 
   await kysely.schema
-    .createTable("suggestions")
+    .createTable("bookSuggestions")
     .ifNotExists()
     .addColumn("bookId", "integer", (col) => col.notNull())
     .addColumn("clubId", "integer", (col) => col.notNull())
@@ -52,13 +54,13 @@ export async function up(kysely: Kysely<any>) {
     .createTable("votes")
     .ifNotExists()
     .addColumn("bookId", "integer", (col) => col.notNull())
-    .addColumn("userId", "integer", (col) => col.notNull())
+    .addColumn("userId", "varchar", (col) => col.notNull())
     .addColumn("clubId", "integer", (col) => col.notNull())
     .addColumn("votingRound", "integer", (col) => col.notNull())
     .execute();
 
   await kysely.schema
-    .createTable("selections")
+    .createTable("bookSelections")
     .ifNotExists()
     .addColumn("bookId", "integer", (col) => col.notNull())
     .addColumn("clubId", "integer", (col) => col.notNull())

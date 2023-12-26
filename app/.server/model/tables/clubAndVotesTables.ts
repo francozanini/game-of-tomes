@@ -1,6 +1,6 @@
 import { Generated, Insertable, Selectable, Updateable } from "kysely";
 
-export type ClubTable = {
+export interface ClubTable {
   id: Generated<number>;
   name: string;
   description: string;
@@ -8,7 +8,7 @@ export type ClubTable = {
   deleted: boolean;
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
 export type Club = Selectable<ClubTable>;
 export type NewClub = Insertable<ClubTable>;
@@ -29,7 +29,7 @@ export type Book = Selectable<BookTable>;
 
 export type ClubMemberTable = {
   clubId: number;
-  userId: number;
+  userId: string;
 };
 
 export type ClubMember = Selectable<ClubMemberTable>;
@@ -47,7 +47,7 @@ export type BookSuggestionUpdate = Updateable<BookSuggestionTable>;
 
 export type VotesTable = {
   bookId: number;
-  userId: number;
+  userId: string;
   clubId: number;
 };
 

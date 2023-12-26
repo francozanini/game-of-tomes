@@ -27,14 +27,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const body = (await request.json()) as UserEvent;
 
-  console.log(body);
-
   const data = body.data;
   const firstEmail = data.email_addresses[0].email_address;
 
   if (body.type === "user.created") {
     await createUser({
-      externalId: data.id,
+      id: data.id,
       email: firstEmail,
       username: data.username || firstEmail,
       imageUrl: data.image_url,

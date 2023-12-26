@@ -7,8 +7,7 @@ import type {
 } from "kysely";
 
 export interface UserTable {
-  id: Generated<number>;
-  externalId: string;
+  id: string;
   username: string;
   email: string;
   imageUrl: string | null;

@@ -39,5 +39,5 @@ export async function findClubAndUserMembership(
       withIsMember(userId),
     ])
     .where("clubs.id", "=", clubId)
-    .execute();
+    .executeTakeFirst();
 }

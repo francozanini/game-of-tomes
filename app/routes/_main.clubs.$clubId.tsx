@@ -14,13 +14,11 @@ export async function loader(args: LoaderFunctionArgs) {
 
   const clubAndMembership = await findClubAndUserMembership(userId, clubId);
 
-  if (!clubAndMembership?.length || !clubAndMembership[0]?.isMember) {
+  if (!clubAndMembership || !clubAndMembership.isMember) {
     throw new Response("Not found", { status: 404 });
   }
 
-  const club = clubAndMembership[0];
-
-  return json({ club });
+  return json({ club: clubAndMembership });
 }
 
 export default function Club() {

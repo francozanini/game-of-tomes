@@ -1,6 +1,6 @@
 import { db } from "~/.server/model/db";
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import {
   Card,
   CardDescription,
@@ -10,27 +10,13 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getAuth } from "@clerk/remix/ssr.server";
+import { findClubsAndComputeUserMembership } from "~/.server/model/clubs";
 
 export async function loader(args: LoaderFunctionArgs) {
   const { userId } = await getAuth(args);
   invariant(userId, "User must be signed in to join a club");
 
-  const clubs = await db
-    .selectFrom("clubs")
-    .select((eb) => [
-      "clubs.id",
-      "clubs.name",
-      "clubs.description",
-      eb
-        .exists(
-          eb
-            .selectFrom("clubMembers")
-            .where("clubMembers.clubId", "=", eb.ref("clubs.id"))
-            .$if(!!userId, (eb) => eb.where("clubMembers.userId", "=", userId)),
-        )
-        .as("isMember"),
-    ])
-    .execute();
+  const clubs = await findClubsAndComputeUserMembership(userId);
 
   return json({ clubs });
 }
@@ -63,12 +49,13 @@ export default function Clubs() {
             <CardFooter>
               <Form method="post" action="/clubs">
                 <input type="hidden" name="clubId" value={club.id} />
-                {!club.isMember && (
-                  <Button type="submit" variant="ghost">
-                    Join
-                  </Button>
-                )}
+                {!club.isMember && <Button type="submit">Join</Button>}
               </Form>
+              {club.isMember && (
+                <Button>
+                  <Link to={`/clubs/${club.id}`}>Details</Link>
+                </Button>
+              )}
             </CardFooter>
           </Card>
         ))}

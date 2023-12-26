@@ -4,6 +4,7 @@ import {
   BookSuggestionTable,
   ClubMemberTable,
   ClubTable,
+  SelectionRoundTable,
   VotesTable,
 } from "~/.server/model/tables/clubAndVotesTables";
 
@@ -14,4 +15,5 @@ export interface Database {
   bookSelections: BookSelectionTable;
   clubMembers: ClubMemberTable;
   votes: VotesTable;
+  selectionRounds: SelectionRoundTable;
 }

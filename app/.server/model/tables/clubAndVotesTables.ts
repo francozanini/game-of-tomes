@@ -39,6 +39,8 @@ export type ClubMemberUpdate = Updateable<ClubMemberTable>;
 export type BookSuggestionTable = {
   bookId: number;
   clubId: number;
+  userId: string;
+  selectionRoundId: number;
 };
 
 export type BookSuggestion = Selectable<BookSuggestionTable>;
@@ -63,3 +65,10 @@ export type BookSelectionTable = {
 export type BookSelection = Selectable<BookSelectionTable>;
 export type NewBookSelection = Insertable<BookSelectionTable>;
 export type BookSelectionUpdate = Updateable<BookSelectionTable>;
+
+export type SelectionRoundTable = {
+  id: Generated<number>;
+  clubId: number;
+  selectedBookId: number | null;
+  state: "open" | "closed";
+};

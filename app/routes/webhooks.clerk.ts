@@ -28,9 +28,9 @@ export async function action({ request }: ActionFunctionArgs) {
   const body = (await request.json()) as UserEvent;
 
   const data = body.data;
-  const firstEmail = data.email_addresses[0].email_address;
 
   if (body.type === "user.created") {
+    const firstEmail = data.email_addresses[0].email_address;
     await createUser({
       id: data.id,
       email: firstEmail,
@@ -39,6 +39,7 @@ export async function action({ request }: ActionFunctionArgs) {
     });
     console.log("created user");
   } else if (body.type === "user.updated") {
+    const firstEmail = data.email_addresses[0].email_address;
     await updateUser(data.id, {
       email: firstEmail,
       username: data.username || firstEmail,

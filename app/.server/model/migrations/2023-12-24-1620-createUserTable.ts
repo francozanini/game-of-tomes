@@ -2,7 +2,7 @@ import { Kysely, sql } from "kysely";
 
 export async function up(kysely: Kysely<any>) {
   await kysely.schema
-    .createTable("user")
+    .createTable("users")
     .ifNotExists()
     .addColumn("id", "varchar", (col) => col.primaryKey())
     .addColumn("deleted", "boolean", (col) => col.notNull().defaultTo(false))
@@ -19,5 +19,5 @@ export async function up(kysely: Kysely<any>) {
 }
 
 export async function down(kysely: Kysely<any>) {
-  await kysely.schema.dropTable("user").execute();
+  await kysely.schema.dropTable("users").execute();
 }

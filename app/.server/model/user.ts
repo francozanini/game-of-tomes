@@ -2,21 +2,21 @@ import { db } from "./db";
 import { NewUser, UserUpdate } from "~/.server/model/tables/userSchema";
 
 export function createUser(newUser: NewUser) {
-  return db.insertInto("user").values(newUser).execute();
+  return db.insertInto("users").values(newUser).execute();
 }
 
 export function updateUser(id: string, updatedUser: UserUpdate) {
   return db
-    .updateTable("user")
+    .updateTable("users")
     .set(updatedUser)
-    .where("externalId", "==", id)
+    .where("id", "==", id)
     .execute();
 }
 
 export function deleteUser(id: string) {
   return db
-    .updateTable("user")
+    .updateTable("users")
     .set({ deleted: true })
-    .where("externalId", "==", id)
+    .where("id", "==", id)
     .execute();
 }

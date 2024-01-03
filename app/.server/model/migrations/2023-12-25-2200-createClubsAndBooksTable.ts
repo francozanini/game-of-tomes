@@ -24,7 +24,7 @@ export async function up(kysely: Kysely<any>) {
     .addColumn("clubId", "integer", (col) => col.notNull())
     .addColumn("userId", "varchar", (col) => col.notNull())
     .addForeignKeyConstraint("clubIdConstraint", ["clubId"], "clubs", ["id"])
-    .addForeignKeyConstraint("userIdConstraint", ["userId"], "user", ["id"])
+    .addForeignKeyConstraint("userIdConstraint", ["userId"], "users", ["id"])
     .execute();
 
   await kysely.schema

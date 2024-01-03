@@ -16,6 +16,7 @@ function createKyselyPostgres() {
   });
   return new Kysely<Database>({
     dialect,
+    log: ["query", "error"],
   });
 }
 

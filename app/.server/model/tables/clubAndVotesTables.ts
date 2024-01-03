@@ -1,4 +1,10 @@
-import { Generated, Insertable, Selectable, Updateable } from "kysely";
+import {
+  ColumnType,
+  Generated,
+  Insertable,
+  Selectable,
+  Updateable,
+} from "kysely";
 
 export interface ClubTable {
   id: Generated<number>;
@@ -71,4 +77,6 @@ export type SelectionRoundTable = {
   clubId: number;
   selectedBookId: number | null;
   state: "suggesting" | "voting" | "closed";
+  inviteToken: string;
+  createdAt: ColumnType<Date, string | undefined, never>;
 };

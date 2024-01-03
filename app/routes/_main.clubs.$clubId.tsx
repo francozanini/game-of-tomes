@@ -2,7 +2,7 @@ import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import { invariant } from "@remix-run/router/history";
 import { getAuth } from "@clerk/remix/ssr.server";
 import { findClub } from "~/.server/model/clubs";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { Button } from "@/components/ui/button";
 import { db } from "~/.server/model/db";
 import { SELECTION_ROUNDS } from "~/.server/model/tables";
@@ -15,13 +15,22 @@ export async function loader(args: LoaderFunctionArgs) {
   const { userId } = await getAuth(args);
   invariant(userId, "User must be signed in to join a club");
 
+  const currentRound = db
+    .selectFrom(SELECTION_ROUNDS)
+    .selectAll()
+    .where("clubId", "=", clubId)
+    .where("state", "=", "suggesting")
+    .orderBy("createdAt", "desc")
+    .limit(1)
+    .executeTakeFirst();
+
   const clubAndMembership = await findClub(userId, clubId);
 
   if (!clubAndMembership || !clubAndMembership.isMember) {
     throw new Response("Not found", { status: 404 });
   }
 
-  return json({ club: clubAndMembership });
+  return json({ club: clubAndMembership, currentRound: await currentRound });
 }
 
 export async function action(args: ActionFunctionArgs) {
@@ -43,16 +52,38 @@ export async function action(args: ActionFunctionArgs) {
     throw new Response("Conflict", { status: 409 });
   }
 
-  await db
+  const invitation = await db
     .insertInto(SELECTION_ROUNDS)
-    .values({ clubId, state: "suggesting" })
-    .execute();
+    .values({ clubId, state: "suggesting", inviteToken: randomString(12) })
+    .returning(["id as invitationId", "inviteToken", "clubId"])
+    .executeTakeFirstOrThrow();
 
-  return json({ message: "Joined club" });
+  return json({ invitation });
+}
+
+function randomString(length: number): string {
+  const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
 }
 
 export default function Club() {
-  const { club } = useLoaderData<typeof loader>();
+  const { club, currentRound } = useLoaderData<typeof loader>();
+  const invitation =
+    useActionData<typeof action>()?.invitation ||
+    (currentRound && {
+      clubId: club.id,
+      inviteToken: currentRound?.inviteToken,
+      invitationId: currentRound?.id,
+    });
+
+  const copyLinkToClipboard = () =>
+    navigator.clipboard.writeText(
+      `${location.origin}/invite/${invitation?.invitationId}/${invitation?.inviteToken}/`,
+    );
 
   return (
     <main className="container">
@@ -66,6 +97,21 @@ export default function Club() {
           <Button type="submit">Start voting round</Button>
         )}
       </Form>
+      {invitation && (
+        <div>
+          <p>
+            Invitation link:{" "}
+            <a
+              href={`/invite/${invitation.invitationId}/${invitation.inviteToken}/`}
+            >
+              {invitation.inviteToken}
+            </a>
+          </p>
+          <Button type="button" variant="ghost" onClick={copyLinkToClipboard}>
+            Copy link
+          </Button>
+        </div>
+      )}
     </main>
   );
 }

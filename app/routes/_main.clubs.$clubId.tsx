@@ -5,6 +5,7 @@ import { findClub } from "~/.server/model/clubs";
 import { Form, useLoaderData } from "@remix-run/react";
 import { Button } from "@/components/ui/button";
 import { db } from "~/.server/model/db";
+import { SELECTION_ROUNDS } from "~/.server/model/tables";
 
 export async function loader(args: LoaderFunctionArgs) {
   const clubIdString = args.params.clubId;
@@ -33,9 +34,9 @@ export async function action(args: ActionFunctionArgs) {
   const clubId = parseInt(clubIdString as string, 10);
 
   const hasOngoingRound = await db
-    .selectFrom("selectionRounds")
+    .selectFrom(SELECTION_ROUNDS)
     .where("clubId", "=", clubId)
-    .where("state", "=", "open")
+    .where("state", "=", "suggesting")
     .executeTakeFirst();
 
   if (hasOngoingRound) {
@@ -43,8 +44,8 @@ export async function action(args: ActionFunctionArgs) {
   }
 
   await db
-    .insertInto("selectionRounds")
-    .values({ clubId, state: "open" })
+    .insertInto(SELECTION_ROUNDS)
+    .values({ clubId, state: "suggesting" })
     .execute();
 
   return json({ message: "Joined club" });

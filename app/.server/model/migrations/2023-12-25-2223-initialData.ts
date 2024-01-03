@@ -1,9 +1,10 @@
 import { Kysely } from "kysely";
 import { Database } from "~/.server/model/tables/schema";
+import { CLUBS } from "../tables";
 
 export async function up(kysely: Kysely<Database>) {
   await kysely
-    .insertInto("clubs")
+    .insertInto(CLUBS)
     .values({
       name: "Game of Tomes",
       description:

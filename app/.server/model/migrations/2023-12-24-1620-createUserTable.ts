@@ -1,8 +1,9 @@
 import { Kysely, sql } from "kysely";
+import { USERS } from "../tables";
 
 export async function up(kysely: Kysely<any>) {
   await kysely.schema
-    .createTable("users")
+    .createTable(USERS)
     .ifNotExists()
     .addColumn("id", "varchar", (col) => col.primaryKey())
     .addColumn("deleted", "boolean", (col) => col.notNull().defaultTo(false))
@@ -19,5 +20,5 @@ export async function up(kysely: Kysely<any>) {
 }
 
 export async function down(kysely: Kysely<any>) {
-  await kysely.schema.dropTable("users").execute();
+  await kysely.schema.dropTable(USERS).execute();
 }

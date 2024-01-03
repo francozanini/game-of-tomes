@@ -2,6 +2,7 @@ import { db } from "~/.server/model/db";
 import { expressionBuilder } from "kysely";
 import { Database } from "~/.server/model/tables/schema";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
+import { CLUBS, SELECTION_ROUNDS } from "./tables";
 
 function withIsMember(userId: string) {
   const eb = expressionBuilder<Database, "clubs">();
@@ -17,7 +18,7 @@ function withIsMember(userId: string) {
 
 export async function findClubsAndComputeUserMembership(userId: string) {
   return await db
-    .selectFrom("clubs")
+    .selectFrom(CLUBS)
     .select([
       "clubs.id",
       "clubs.name",
@@ -29,7 +30,7 @@ export async function findClubsAndComputeUserMembership(userId: string) {
 
 export async function findClub(userId: string, clubId: number) {
   return await db
-    .selectFrom("clubs")
+    .selectFrom(CLUBS)
     .select((eb) => [
       "clubs.id",
       "clubs.name",
@@ -38,7 +39,7 @@ export async function findClub(userId: string, clubId: number) {
       eb
         .exists(
           eb
-            .selectFrom("selectionRounds")
+            .selectFrom(SELECTION_ROUNDS)
             .selectAll()
             .where("selectionRounds.clubId", "=", clubId)
             .where((eb) =>

@@ -5,14 +5,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SignInButton, SignOutButton, useUser } from "@clerk/remix";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/remix";
 import { Outlet } from "@remix-run/react";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { Theme, useTheme } from "~/theme";
 
 export default function IndexLayout() {
-  const { isSignedIn } = useUser();
-
   return (
     <>
       <header className="border-b border-border/40">
@@ -27,7 +25,12 @@ export default function IndexLayout() {
             </a>
           </div>
           <div className="flex flex-row gap-2">
-            {isSignedIn ? <SignOutButton /> : <SignInButton mode="modal" />}
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal" />
+            </SignedOut>
             <ThemeChanger />
           </div>
         </div>

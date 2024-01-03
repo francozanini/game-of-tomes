@@ -41,7 +41,12 @@ export async function findClub(userId: string, clubId: number) {
             .selectFrom("selectionRounds")
             .selectAll()
             .where("selectionRounds.clubId", "=", clubId)
-            .where("selectionRounds.state", "=", "open"),
+            .where((eb) =>
+              eb.or([
+                eb("selectionRounds.state", "=", "suggesting"),
+                eb("selectionRounds.state", "=", "voting"),
+              ]),
+            ),
         )
         .as("hasOpenSelectionRound"),
     ])

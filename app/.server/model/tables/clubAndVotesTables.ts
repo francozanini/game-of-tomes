@@ -70,5 +70,5 @@ export type SelectionRoundTable = {
   id: Generated<number>;
   clubId: number;
   selectedBookId: number | null;
-  state: "open" | "closed";
+  state: "suggesting" | "voting" | "closed";
 };

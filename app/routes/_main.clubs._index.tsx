@@ -10,7 +10,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getAuth } from "@clerk/remix/ssr.server";
-import { findClubsAndComputeUserMembership } from "~/.server/model/clubs";
+import {
+  findClubsAndComputeUserMembership,
+  joinClub,
+} from "~/.server/model/clubs";
+import invariant from "~/utils/invariant";
 
 export async function loader(args: LoaderFunctionArgs) {
   const { userId } = await getAuth(args);
@@ -30,7 +34,7 @@ export async function action(args: ActionFunctionArgs) {
   invariant(clubIdString, "Club ID must be provided");
   const clubId = parseInt(clubIdString as string, 10);
 
-  await db.insertInto("clubMembers").values({ clubId, userId }).execute();
+  await joinClub(userId, clubId);
 
   return json({ message: "Joined club" });
 }
@@ -62,9 +66,4 @@ export default function Clubs() {
       </div>
     </main>
   );
-}
-function invariant(val: unknown, message: string): asserts val {
-  if (val === null) {
-    throw new Error(message);
-  }
 }

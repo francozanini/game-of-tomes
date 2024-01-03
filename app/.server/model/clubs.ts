@@ -2,7 +2,7 @@ import { db } from "~/.server/model/db";
 import { expressionBuilder } from "kysely";
 import { Database } from "~/.server/model/tables/schema";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
-import { CLUBS, SELECTION_ROUNDS } from "./tables";
+import { CLUBS, CLUB_MEMBERS, SELECTION_ROUNDS } from "./tables";
 
 function withIsMember(userId: string) {
   const eb = expressionBuilder<Database, "clubs">();
@@ -53,4 +53,14 @@ export async function findClub(userId: string, clubId: number) {
     ])
     .where("clubs.id", "=", clubId)
     .executeTakeFirst();
+}
+
+export async function joinClub(userId: string, clubId: number) {
+  return await db
+    .insertInto(CLUB_MEMBERS)
+    .values({
+      clubId,
+      userId,
+    })
+    .execute();
 }

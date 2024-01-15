@@ -6,6 +6,16 @@ export async function fetchBooks(searchTerm: string) {
     .then((res) => uniqueByTitleAndAuthor(res.items).slice(0, 5));
 }
 
+export async function fetchBook(id: number) {
+  return await fetch(`https://www.googleapis.com/books/v1/volumes/${id}`)
+    .then((res) => res.json() as Promise<Book>)
+    .then((res) => res);
+}
+
+export async function fetchBooksByIds(ids: number[]) {
+  return await Promise.all(ids.map((id) => fetchBook(id)));
+}
+
 function uniqueByTitleAndAuthor(books: Book[]) {
   const uniqueBooks = new Map<string, Book>();
 

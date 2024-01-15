@@ -2,11 +2,11 @@ import { getAuth } from "@clerk/remix/ssr.server";
 import { LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { joinClub } from "~/.server/model/clubs";
 import { db } from "~/.server/model/db";
-import { CLUBS, CLUB_MEMBERS, SELECTION_ROUNDS } from "~/.server/model/tables";
+import { CLUB_MEMBERS, CLUBS, SELECTION_ROUNDS } from "~/.server/model/tables";
 import invariant from "~/utils/invariant";
 
 export async function loader(args: LoaderFunctionArgs) {
-  const { invitationIdRaw, inviteToken } = args.params;
+  const { invitationId: invitationIdRaw, inviteToken } = args.params;
   invariant(invitationIdRaw, "invitationId is required");
   invariant(inviteToken, "inviteToken is required");
   const invitationId = parseInt(invitationIdRaw, 10);
@@ -20,6 +20,7 @@ export async function loader(args: LoaderFunctionArgs) {
   const round = await db
     .selectFrom(SELECTION_ROUNDS)
     .select((eb) => [
+      "selectionRounds.id as id",
       "state",
       "clubId",
       eb
@@ -35,7 +36,7 @@ export async function loader(args: LoaderFunctionArgs) {
     .leftJoin(CLUBS, "clubs.id", "clubId")
     .where((eb) =>
       eb.and([
-        eb("id", "=", invitationId),
+        eb("selectionRounds.id", "=", invitationId),
         eb("inviteToken", "=", inviteToken),
       ]),
     )
@@ -54,9 +55,9 @@ export async function loader(args: LoaderFunctionArgs) {
   }
 
   if (round.state === "suggesting") {
-    return redirect(`/clubs/${round.clubId}/suggestions`);
+    return redirect(`/clubs/${round.clubId}/suggestions/${round.id}`);
   } else if (round.state === "voting") {
-    return redirect(`/clubs/${round.clubId}/vote`);
+    return redirect(`/clubs/${round.clubId}/vote/${round.id}`);
   } else {
     throw new Error("Unknown state");
   }

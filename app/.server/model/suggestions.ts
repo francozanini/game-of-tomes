@@ -39,3 +39,13 @@ export function removeSuggestion({
     .where("userId", "=", userId)
     .execute();
 }
+
+export function findSuggestedBooks(clubId: number, selectionRoundId: number) {
+  return db
+    .selectFrom(BOOK_SUGGESTIONS)
+    .select(["bookId"])
+    .where("clubId", "=", clubId)
+    .where("selectionRoundId", "=", selectionRoundId)
+    .orderBy("addedAt", "desc")
+    .execute();
+}

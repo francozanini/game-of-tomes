@@ -10,11 +10,13 @@ import {
 } from "@remix-run/node";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { Book, fetchBooks, fetchBooksByIds } from "~/.server/google-books/api";
-import { db } from "~/.server/model/db";
-import { BOOK_SUGGESTIONS } from "~/.server/model/tables";
 import { getAuth } from "@clerk/remix/ssr.server";
 import invariant from "~/utils/invariant";
-import { addSuggestion, removeSuggestion } from "~/.server/model/suggestions";
+import {
+  addSuggestion,
+  findSuggestedBooks,
+  removeSuggestion,
+} from "~/.server/model/suggestions";
 import { BooksSearchResults, SearchBar } from "~/components/bookSearch";
 import { BookCardList } from "~/components/bookCard";
 import { NumericStringSchema } from "~/utils/types";
@@ -26,14 +28,9 @@ export async function loader(args: LoaderFunctionArgs) {
   const clubId = args.params.clubId!;
   const selectionRoundId = args.params.selectionRoundId!;
 
-  const suggestedBooks = db
-    .selectFrom(BOOK_SUGGESTIONS)
-    .select(["bookId"])
-    .where("clubId", "=", +clubId)
-    .where("selectionRoundId", "=", +selectionRoundId)
-    .orderBy("addedAt", "desc")
-    .execute()
-    .then((suggestions) => suggestions.map((suggestion) => suggestion.bookId));
+  const suggestedBooks = findSuggestedBooks(+clubId, +selectionRoundId).then(
+    (suggestions) => suggestions.map((suggestion) => suggestion.bookId),
+  );
 
   if (!searchTerm) {
     return json({

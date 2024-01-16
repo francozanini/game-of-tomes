@@ -1,3 +1,5 @@
+import { bookCache } from "~/.server/google-books/bookCache";
+
 export async function fetchBooks(searchTerm: string) {
   return await fetch(
     `https://www.googleapis.com/books/v1/volumes?q=${searchTerm}&maxResults=40&printType=books`,
@@ -11,9 +13,21 @@ export async function fetchBooks(searchTerm: string) {
 }
 
 export async function fetchBook(id: string) {
-  return await fetch(`https://www.googleapis.com/books/v1/volumes/${id}`)
+  const cachedBook = bookCache.get(id);
+
+  if (cachedBook) {
+    return cachedBook;
+  }
+
+  const fetchedBook = await fetch(
+    `https://www.googleapis.com/books/v1/volumes/${id}`,
+  )
     .then((res) => res.json() as Promise<Book>)
     .then((res) => res);
+
+  bookCache.set(id, fetchedBook);
+
+  return fetchedBook;
 }
 
 export async function fetchBooksByIds(ids: string[]) {

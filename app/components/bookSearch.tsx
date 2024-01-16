@@ -1,8 +1,10 @@
 import { Book } from "~/.server/google-books/api";
 import { Card } from "../../@/components/ui/card";
-import { Form } from "@remix-run/react";
+import { Form, useNavigation } from "@remix-run/react";
 import { Button } from "../../@/components/ui/button";
 import { Input } from "../../@/components/ui/input";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { SkeletonList } from "~/components/skeleton";
 
 export function BooksSearchResults({
   books,
@@ -11,10 +13,19 @@ export function BooksSearchResults({
   books: Book[];
   booksAlreadySelected?: Book[];
 }) {
+  const { state: navigationState, formAction } = useNavigation();
+  const booksLoading = navigationState === "loading" && formAction === "get";
+  const addingBook = navigationState === "submitting" && formAction === "post";
+  const [ref] = useAutoAnimate();
+
+  if (booksLoading) {
+    return <SkeletonList />;
+  }
+
   return (
-    <>
+    <div ref={ref} className="flex flex-col gap-2">
       {books.map((book) => (
-        <Card key={book.id} className="flex flex-row gap-2">
+        <Card key={book.id} className="flex max-w-lg flex-row gap-2">
           <img
             src={
               book.volumeInfo.imageLinks?.smallThumbnail ||
@@ -28,22 +39,33 @@ export function BooksSearchResults({
             <span className="text-sm text-muted-foreground">
               by {book.volumeInfo.authors?.join(", ")}
             </span>
-            <Form>
+            <Form method="post">
               <input type="hidden" name="bookId" value={book.id} />
-              <input type="hidden" name="intent" value="add" />
+              <input
+                type="hidden"
+                name="intent"
+                value={
+                  booksAlreadySelected.map((book) => book.id).includes(book.id)
+                    ? "remove"
+                    : "add"
+                }
+              />
               <Button
                 type="submit"
                 variant="ghost"
                 title="Add"
+                disabled={addingBook}
                 className="self-start"
               >
-                {booksAlreadySelected.includes(book) ? "Remove" : "Add"}
+                {booksAlreadySelected.map((book) => book.id).includes(book.id)
+                  ? "Remove"
+                  : "Add"}
               </Button>
             </Form>
           </aside>
         </Card>
       ))}
-    </>
+    </div>
   );
 }
 

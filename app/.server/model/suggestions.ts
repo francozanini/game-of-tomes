@@ -2,7 +2,7 @@ import { db } from "./db";
 import { BOOK_SUGGESTIONS } from "./tables";
 
 type Suggestion = {
-  bookId: number;
+  bookId: string;
   clubId: number;
   userId: string;
   selectionRoundId: number;

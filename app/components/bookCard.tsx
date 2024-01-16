@@ -7,11 +7,20 @@ import {
   CardTitle,
 } from "../../@/components/ui/card";
 import { Button } from "../../@/components/ui/button";
-import { Form } from "@remix-run/react";
+import { Form, useNavigation } from "@remix-run/react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Skeleton } from "../../@/components/ui/skeleton";
+import { SuggestBookInput } from "~/utils/suggestedBooks";
 
-function BookCard({ book: { volumeInfo, id } }: { book: Book }) {
+function BookCard({
+  book: { volumeInfo, id },
+  fading,
+}: {
+  book: Book;
+  fading?: boolean;
+}) {
   return (
-    <Card>
+    <Card className={fading ? "grayscale" : ""}>
       <img
         src={
           volumeInfo.imageLinks?.thumbnail || "https://placeholder.co/128x194"
@@ -46,10 +55,21 @@ function BookCard({ book: { volumeInfo, id } }: { book: Book }) {
 }
 
 export function BookCardList({ books }: { books: Book[] }) {
+  const { formData } = useNavigation();
+  const pendingData = SuggestBookInput.safeParse(formData ?? {});
+  const removing = pendingData.success && pendingData.data.intent === "remove";
+  const adding = pendingData.success && pendingData.data.intent === "add";
+
+  const [ref] = useAutoAnimate();
   return (
-    <div className="flex flex-row gap-4">
+    <div className="flex flex-row gap-4" ref={ref}>
+      {adding && <Skeleton className="h-80 w-52" />}
       {books.map((book) => (
-        <BookCard key={book.id} book={book} />
+        <BookCard
+          key={book.id}
+          book={book}
+          fading={removing && pendingData.data.bookId === book.id}
+        />
       ))}
     </div>
   );

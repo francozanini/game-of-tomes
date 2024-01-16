@@ -8,23 +8,17 @@ import {
   json,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import {
-  useLoaderData,
-  useNavigation,
-  useSearchParams,
-} from "@remix-run/react";
+import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { Book, fetchBooks, fetchBooksByIds } from "~/.server/google-books/api";
 import { db } from "~/.server/model/db";
 import { BOOK_SUGGESTIONS } from "~/.server/model/tables";
-import { zfd } from "zod-form-data";
-import { z } from "zod";
 import { getAuth } from "@clerk/remix/ssr.server";
 import invariant from "~/utils/invariant";
 import { addSuggestion, removeSuggestion } from "~/.server/model/suggestions";
-import { SkeletonList } from "~/components/skeleton";
 import { BooksSearchResults, SearchBar } from "~/components/bookSearch";
 import { BookCardList } from "~/components/bookCard";
 import { NumericStringSchema } from "~/utils/types";
+import { SuggestBookInput } from "~/utils/suggestedBooks";
 
 export async function loader(args: LoaderFunctionArgs) {
   const { searchParams } = new URL(args.request.url);
@@ -37,6 +31,7 @@ export async function loader(args: LoaderFunctionArgs) {
     .select(["bookId"])
     .where("clubId", "=", +clubId)
     .where("selectionRoundId", "=", +selectionRoundId)
+    .orderBy("addedAt", "desc")
     .execute()
     .then((suggestions) => suggestions.map((suggestion) => suggestion.bookId));
 
@@ -57,11 +52,6 @@ export async function loader(args: LoaderFunctionArgs) {
     suggestedBooks: enrichedSuggestedBooks,
   });
 }
-
-const SuggestBookInput = zfd.formData({
-  bookId: zfd.numeric(),
-  intent: zfd.text(z.enum(["add", "remove"])),
-});
 
 export async function action(args: ActionFunctionArgs) {
   const formData = SuggestBookInput.parse(await args.request.formData());
@@ -94,10 +84,6 @@ export async function action(args: ActionFunctionArgs) {
 export default function Index() {
   const { searchedBooks, suggestedBooks } = useLoaderData<typeof loader>();
   const [params] = useSearchParams();
-  const { state: navigationState } = useNavigation();
-
-  const booksLoading =
-    navigationState === "loading" || navigationState === "submitting";
 
   return (
     <ResizablePanelGroup
@@ -106,14 +92,10 @@ export default function Index() {
     >
       <ResizablePanel defaultSize={20} className="flex flex-col gap-2 pt-4">
         <SearchBar initialSearchTerm={params.get("searchTerm") || ""} />
-        {booksLoading ? (
-          <SkeletonList />
-        ) : (
-          <BooksSearchResults
-            books={searchedBooks}
-            booksAlreadySelected={suggestedBooks}
-          />
-        )}
+        <BooksSearchResults
+          books={searchedBooks}
+          booksAlreadySelected={suggestedBooks}
+        />
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel className="pt-4" defaultSize={80}>

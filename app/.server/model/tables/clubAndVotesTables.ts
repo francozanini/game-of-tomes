@@ -21,7 +21,7 @@ export type NewClub = Insertable<ClubTable>;
 export type ClubUpdate = Updateable<ClubTable>;
 
 export type BookTable = {
-  id: Generated<number>;
+  id: string;
   title: string;
   description: string;
   imageUrl: string | null;
@@ -43,10 +43,11 @@ export type NewClubMember = Insertable<ClubMemberTable>;
 export type ClubMemberUpdate = Updateable<ClubMemberTable>;
 
 export type BookSuggestionTable = {
-  bookId: number;
+  bookId: string;
   clubId: number;
   userId: string;
   selectionRoundId: number;
+  addedAt: ColumnType<Date, string | undefined, never>;
 };
 
 export type BookSuggestion = Selectable<BookSuggestionTable>;
@@ -54,7 +55,7 @@ export type NewBookSuggestion = Insertable<BookSuggestionTable>;
 export type BookSuggestionUpdate = Updateable<BookSuggestionTable>;
 
 export type VotesTable = {
-  bookId: number;
+  bookId: string;
   userId: string;
   clubId: number;
 };
@@ -64,7 +65,7 @@ export type NewVote = Insertable<VotesTable>;
 export type VoteUpdate = Updateable<VotesTable>;
 
 export type BookSelectionTable = {
-  bookId: number;
+  bookId: string;
   clubId: number;
 };
 

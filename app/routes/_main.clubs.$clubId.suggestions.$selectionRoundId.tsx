@@ -21,6 +21,8 @@ import { BooksSearchResults, SearchBar } from "~/components/bookSearch";
 import { BookCardList } from "~/components/bookCard";
 import { NumericStringSchema } from "~/utils/types";
 import { SuggestBookInput } from "~/utils/suggestedBooks";
+import { emitBookSuggestion, emitter } from "~/.server/events/emitter";
+import { useLiveLoader } from "~/utils/liveLoader";
 
 export async function loader(args: LoaderFunctionArgs) {
   const { searchParams } = new URL(args.request.url);
@@ -66,6 +68,9 @@ export async function action(args: ActionFunctionArgs) {
       selectionRoundId,
       userId,
     });
+
+    emitBookSuggestion();
+
     return json({ message: "Added suggestion" });
   } else if (formData.intent === "remove") {
     await removeSuggestion({
@@ -74,12 +79,15 @@ export async function action(args: ActionFunctionArgs) {
       selectionRoundId,
       userId,
     });
+
+    emitBookSuggestion();
+
     return json({ message: "Removed suggestion" });
   } else throw new Error("Invalid intent");
 }
 
 export default function Index() {
-  const { searchedBooks, suggestedBooks } = useLoaderData<typeof loader>();
+  const { searchedBooks, suggestedBooks } = useLiveLoader<typeof loader>();
   const [params] = useSearchParams();
 
   return (

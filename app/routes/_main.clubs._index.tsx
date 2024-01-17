@@ -57,7 +57,7 @@ export default function Clubs() {
               </Form>
               {club.isMember && (
                 <Button>
-                  <Link to={`/clubs/${club.id}`}>Details</Link>
+                  <Link to={`/clubs/${club.id}/manage`}>Details</Link>
                 </Button>
               )}
             </CardFooter>

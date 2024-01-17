@@ -1,19 +1,31 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { invariant } from "@remix-run/router/history";
-import { getAuth } from "@clerk/remix/ssr.server";
+import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { findClub } from "~/.server/model/clubs";
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { Button } from "@/components/ui/button";
 import { db } from "~/.server/model/db";
 import { SELECTION_ROUNDS } from "~/.server/model/tables";
+import { zfd } from "zod-form-data";
+import { z } from "zod";
+import {
+  hasRoundOnState,
+  startSelectionRound,
+} from "~/.server/model/selectionRounds";
+import { requireAuthenticated } from "~/.server/auth/guards";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../@/components/ui/card";
+
+const loaderSchema = z.object({
+  clubId: z.string().transform((val) => parseInt(val, 10)),
+});
 
 export async function loader(args: LoaderFunctionArgs) {
-  const clubIdString = args.params.clubId;
-  invariant(clubIdString, "Club ID must be provided");
-  const clubId = parseInt(clubIdString as string, 10);
-
-  const { userId } = await getAuth(args);
-  invariant(userId, "User must be signed in to join a club");
+  const { userId } = await requireAuthenticated(args);
+  const { clubId } = loaderSchema.parse(args.params);
 
   const currentRound = db
     .selectFrom(SELECTION_ROUNDS)
@@ -33,41 +45,25 @@ export async function loader(args: LoaderFunctionArgs) {
   return json({ club: clubAndMembership, currentRound: await currentRound });
 }
 
+const roundSchema = zfd.formData({
+  clubId: zfd.numeric(),
+  intent: zfd.text(z.enum(["suggest", "vote"])),
+});
+
 export async function action(args: ActionFunctionArgs) {
-  const { userId } = await getAuth(args);
-  invariant(userId, "User must be signed in to start voting round");
+  await requireAuthenticated(args);
 
-  const formData = await args.request.formData();
-  const clubIdString = formData.get("clubId");
-  invariant(clubIdString, "Club ID must be provided");
-  const clubId = parseInt(clubIdString as string, 10);
+  const { clubId, intent } = roundSchema.parse(await args.request.formData());
 
-  const hasOngoingRound = await db
-    .selectFrom(SELECTION_ROUNDS)
-    .where("clubId", "=", clubId)
-    .where("state", "=", "suggesting")
-    .executeTakeFirst();
+  const hasOngoingRound = await hasRoundOnState(clubId, "suggesting");
 
   if (hasOngoingRound) {
     throw new Response("Conflict", { status: 409 });
   }
 
-  const invitation = await db
-    .insertInto(SELECTION_ROUNDS)
-    .values({ clubId, state: "suggesting", inviteToken: randomString(12) })
-    .returning(["id as invitationId", "inviteToken", "clubId"])
-    .executeTakeFirstOrThrow();
+  const invitation = await startSelectionRound(clubId);
 
   return json({ invitation });
-}
-
-function randomString(length: number): string {
-  const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
-  let result = "";
-  for (let i = 0; i < length; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
 }
 
 export default function Club() {
@@ -87,30 +83,33 @@ export default function Club() {
 
   return (
     <main className="container">
-      <h1 className="text-lg font-bold">{club.name}</h1>
-      <p>{club.description}</p>
-      <Form method="post">
-        <input type="hidden" name="clubId" value={club.id} />
-        {club.hasOpenSelectionRound ? (
-          <div>Round already ongoing</div>
-        ) : (
-          <Button type="submit">Start voting round</Button>
-        )}
-      </Form>
       {invitation && (
-        <div>
-          <p>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-bold">{club.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form method="post">
+              <input type="hidden" name="clubId" value={club.id} />
+              {club.hasOpenSelectionRound ? (
+                <div>Round already ongoing</div>
+              ) : (
+                <Button type="submit">Start selection round</Button>
+              )}
+            </Form>
             Invitation link:{" "}
-            <a
-              href={`/invite/${invitation.invitationId}/${invitation.inviteToken}/`}
+            <Link
+              to={`/invite/${invitation.invitationId}/${invitation.inviteToken}/`}
             >
               {invitation.inviteToken}
-            </a>
-          </p>
-          <Button type="button" variant="ghost" onClick={copyLinkToClipboard}>
-            Copy link
-          </Button>
-        </div>
+            </Link>
+          </CardContent>
+          <CardFooter>
+            <Button type="button" onClick={copyLinkToClipboard}>
+              Copy link
+            </Button>
+          </CardFooter>
+        </Card>
       )}
     </main>
   );

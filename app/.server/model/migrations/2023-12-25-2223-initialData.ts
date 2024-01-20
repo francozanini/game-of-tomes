@@ -1,8 +1,8 @@
 import { Kysely } from "kysely";
-import { Database } from "~/.server/model/tables/schema";
 import { CLUBS } from "../tables";
+import { DB } from "kysely-codegen";
 
-export async function up(kysely: Kysely<Database>) {
+export async function up(kysely: Kysely<DB>) {
   await kysely
     .insertInto(CLUBS)
     .values({

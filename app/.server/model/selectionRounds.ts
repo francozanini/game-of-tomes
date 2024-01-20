@@ -1,11 +1,23 @@
 import { db } from "~/.server/model/db";
 import { SELECTION_ROUNDS } from "~/.server/model/tables";
 
-export function startSelectionRound(clubId: number) {
+export function startOrMoveSelectionRound(clubId: number) {
   return db
     .insertInto(SELECTION_ROUNDS)
     .values({ clubId, state: "suggesting", inviteToken: randomString(12) })
     .returning(["id as invitationId", "inviteToken", "clubId"])
+    .onConflict((cb) =>
+      cb.constraint("").doUpdateSet({
+        state: (eb) =>
+          eb
+            .case()
+            .when("state", "=", "suggesting")
+            .then("voting")
+            .when("state", "=", "voting")
+            .then("finished")
+            .endCase(),
+      }),
+    )
     .executeTakeFirstOrThrow();
 }
 
@@ -27,5 +39,15 @@ export function hasRoundOnState(
     .select("id")
     .where("clubId", "=", clubId)
     .where("state", "=", state)
+    .executeTakeFirst();
+}
+
+export function activeSelectionRound(clubId: number) {
+  return db
+    .selectFrom(SELECTION_ROUNDS)
+    .selectAll()
+    .where("clubId", "=", clubId)
+    .where("state", "in", ["suggesting", "voting"])
+    .orderBy("createdAt", "desc")
     .executeTakeFirst();
 }

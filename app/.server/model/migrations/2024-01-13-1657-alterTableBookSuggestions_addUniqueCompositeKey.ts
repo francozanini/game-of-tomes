@@ -25,11 +25,11 @@ export async function up(kysely: Kysely<any>) {
 export async function down(kysely: Kysely<any>) {
   await kysely.schema
     .alterTable(BOOK_SUGGESTIONS)
-    .dropColumn(selectionRoundId)
+    .dropConstraint(constraintName)
     .execute();
 
   await kysely.schema
     .alterTable(BOOK_SUGGESTIONS)
-    .dropConstraint(constraintName)
+    .dropColumn(selectionRoundId)
     .execute();
 }

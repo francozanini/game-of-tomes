@@ -1,8 +1,8 @@
-export const SELECTION_ROUNDS = "selectionRounds";
-export const BOOK_SUGGESTIONS = "bookSuggestions";
-export const BOOK_SELECTIONS = "bookSelections";
-export const CLUBS = "clubs";
-export const CLUB_MEMBERS = "clubMembers";
-export const BOOKS = "books";
-export const VOTES = "votes";
-export const USERS = "users";
+export const SELECTION_ROUNDS = "selectionRound";
+export const BOOK_SUGGESTIONS = "bookSuggestion";
+export const BOOK_SELECTIONS = "bookSelection";
+export const CLUBS = "club";
+export const CLUB_MEMBERS = "clubMember";
+export const BOOKS = "book";
+export const VOTES = "vote";
+export const USERS = "user";

@@ -1,4 +1,4 @@
-import { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 import {
   BOOK_SELECTIONS,
   BOOK_SUGGESTIONS,
@@ -31,21 +31,29 @@ export async function up(kysely: Kysely<any>) {
 export async function down(kysely: Kysely<any>) {
   await kysely.schema
     .alterTable(BOOK_SUGGESTIONS)
-    .alterColumn("bookId", (col) => col.setDataType("integer"))
+    .alterColumn("bookId", (col) =>
+      col.setDataType(sql`integer USING "bookId"::integer`),
+    )
     .execute();
 
   await kysely.schema
     .alterTable(BOOKS)
-    .alterColumn("id", (col) => col.setDataType("integer"))
+    .alterColumn("id", (col) =>
+      col.setDataType(sql`integer USING "id"::integer`),
+    )
     .execute();
 
   await kysely.schema
     .alterTable(BOOK_SELECTIONS)
-    .alterColumn("bookId", (col) => col.setDataType("integer"))
+    .alterColumn("bookId", (col) =>
+      col.setDataType(sql`integer USING "bookId"::integer`),
+    )
     .execute();
 
   await kysely.schema
     .alterTable(VOTES)
-    .alterColumn("bookId", (col) => col.setDataType("integer"))
+    .alterColumn("bookId", (col) =>
+      col.setDataType(sql`integer USING "bookId"::integer`),
+    )
     .execute();
 }

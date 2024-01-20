@@ -2,13 +2,12 @@ import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { findClub } from "~/.server/model/clubs";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { Button } from "@/components/ui/button";
-import { db } from "~/.server/model/db";
-import { SELECTION_ROUNDS } from "~/.server/model/tables";
 import { zfd } from "zod-form-data";
 import { z } from "zod";
 import {
+  activeSelectionRound,
   hasRoundOnState,
-  startSelectionRound,
+  startOrMoveSelectionRound,
 } from "~/.server/model/selectionRounds";
 import { requireAuthenticated } from "~/.server/auth/guards";
 import {
@@ -27,14 +26,7 @@ export async function loader(args: LoaderFunctionArgs) {
   const { userId } = await requireAuthenticated(args);
   const { clubId } = loaderSchema.parse(args.params);
 
-  const currentRound = db
-    .selectFrom(SELECTION_ROUNDS)
-    .selectAll()
-    .where("clubId", "=", clubId)
-    .where("state", "=", "suggesting")
-    .orderBy("createdAt", "desc")
-    .limit(1)
-    .executeTakeFirst();
+  const currentRound = activeSelectionRound(clubId);
 
   const clubAndMembership = await findClub(userId, clubId);
 
@@ -47,13 +39,12 @@ export async function loader(args: LoaderFunctionArgs) {
 
 const roundSchema = zfd.formData({
   clubId: zfd.numeric(),
-  intent: zfd.text(z.enum(["suggest", "vote"])),
 });
 
 export async function action(args: ActionFunctionArgs) {
   await requireAuthenticated(args);
 
-  const { clubId, intent } = roundSchema.parse(await args.request.formData());
+  const { clubId } = roundSchema.parse(await args.request.formData());
 
   const hasOngoingRound = await hasRoundOnState(clubId, "suggesting");
 
@@ -61,7 +52,7 @@ export async function action(args: ActionFunctionArgs) {
     throw new Response("Conflict", { status: 409 });
   }
 
-  const invitation = await startSelectionRound(clubId);
+  const invitation = await startOrMoveSelectionRound(clubId);
 
   return json({ invitation });
 }
@@ -91,11 +82,13 @@ export default function Club() {
           <CardContent>
             <Form method="post">
               <input type="hidden" name="clubId" value={club.id} />
-              {club.hasOpenSelectionRound ? (
-                <div>Round already ongoing</div>
-              ) : (
-                <Button type="submit">Start selection round</Button>
-              )}
+              <Button type="submit">
+                {currentRound?.state === "voting"
+                  ? "Close votes"
+                  : currentRound?.state === "suggesting"
+                    ? "Close round"
+                    : "Start selection"}
+              </Button>
             </Form>
             Invitation link:{" "}
             <Link

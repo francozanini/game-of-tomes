@@ -1,4 +1,3 @@
-import { db } from "~/.server/model/db";
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import {
@@ -51,7 +50,7 @@ export default function Clubs() {
               <CardDescription>{club.description}</CardDescription>
             </CardHeader>
             <CardFooter>
-              <Form method="post" action="/clubs">
+              <Form method="post">
                 <input type="hidden" name="clubId" value={club.id} />
                 {!club.isMember && <Button type="submit">Join</Button>}
               </Form>

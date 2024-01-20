@@ -1,24 +1,37 @@
 import { db } from "~/.server/model/db";
 import { SELECTION_ROUNDS } from "~/.server/model/tables";
+import { Transaction } from "kysely";
+import { DB } from "kysely-codegen";
 
-export function startOrMoveSelectionRound(clubId: number) {
-  return db
-    .insertInto(SELECTION_ROUNDS)
-    .values({ clubId, state: "suggesting", inviteToken: randomString(12) })
-    .returning(["id as invitationId", "inviteToken", "clubId"])
-    .onConflict((cb) =>
-      cb.constraint("").doUpdateSet({
-        state: (eb) =>
-          eb
-            .case()
-            .when("state", "=", "suggesting")
-            .then("voting")
-            .when("state", "=", "voting")
-            .then("finished")
-            .endCase(),
-      }),
-    )
-    .executeTakeFirstOrThrow();
+export async function startOrAdvanceSelectionRound(clubId: number) {
+  return db.transaction().execute(async (trx) => {
+    const activeRound = await activeSelectionRound(clubId, trx);
+
+    const invitationSelections = [
+      "id as invitationId",
+      "inviteToken",
+      "clubId",
+    ] as const;
+
+    if (!activeRound) {
+      return await trx
+        .insertInto(SELECTION_ROUNDS)
+        .values({ clubId, state: "suggesting", inviteToken: randomString(12) })
+        .returning(invitationSelections)
+        .executeTakeFirstOrThrow();
+    }
+
+    const nextState =
+      activeRound?.state === "suggesting" ? "voting" : "finished";
+
+    return trx
+      .updateTable(SELECTION_ROUNDS)
+      .set({ state: nextState })
+      .where("id", "=", activeRound.id)
+      .returning(invitationSelections)
+      .from(SELECTION_ROUNDS)
+      .executeTakeFirstOrThrow();
+  });
 }
 
 function randomString(length: number): string {
@@ -42,8 +55,8 @@ export function hasRoundOnState(
     .executeTakeFirst();
 }
 
-export function activeSelectionRound(clubId: number) {
-  return db
+export function activeSelectionRound(clubId: number, trx?: Transaction<DB>) {
+  return (trx ? trx : db)
     .selectFrom(SELECTION_ROUNDS)
     .selectAll()
     .where("clubId", "=", clubId)

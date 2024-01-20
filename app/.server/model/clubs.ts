@@ -1,17 +1,15 @@
 import { db } from "~/.server/model/db";
 import { expressionBuilder } from "kysely";
-import { Database } from "~/.server/model/tables/schema";
-import { jsonArrayFrom } from "kysely/helpers/postgres";
 import { CLUBS, CLUB_MEMBERS, SELECTION_ROUNDS } from "./tables";
+import { DB } from "kysely-codegen";
 
 function withIsMember(userId: string) {
-  const eb = expressionBuilder<Database, "clubs">();
-  return eb
-    .exists(
+  return expressionBuilder<DB, typeof CLUBS>()
+    .exists((eb) =>
       eb
-        .selectFrom("clubMembers")
-        .where("clubMembers.clubId", "=", eb.ref("clubs.id"))
-        .where("clubMembers.userId", "=", userId),
+        .selectFrom(CLUB_MEMBERS)
+        .where("clubMember.clubId", "=", eb.ref("club.id"))
+        .where("clubMember.userId", "=", userId),
     )
     .as("isMember");
 }
@@ -19,39 +17,34 @@ function withIsMember(userId: string) {
 export async function findClubsAndComputeUserMembership(userId: string) {
   return await db
     .selectFrom(CLUBS)
-    .select([
-      "clubs.id",
-      "clubs.name",
-      "clubs.description",
-      withIsMember(userId),
-    ])
+    .select(["club.id", "club.name", "club.description", withIsMember(userId)])
     .execute();
 }
 
-export async function findClub(userId: string, clubId: number) {
+export async function findClub(clubId: number, userId: string) {
   return await db
     .selectFrom(CLUBS)
     .select((eb) => [
-      "clubs.id",
-      "clubs.name",
-      "clubs.description",
+      "club.id",
+      "club.name",
+      "club.description",
       withIsMember(userId),
       eb
         .exists(
           eb
             .selectFrom(SELECTION_ROUNDS)
             .selectAll()
-            .where("selectionRounds.clubId", "=", clubId)
+            .where("selectionRound.clubId", "=", clubId)
             .where((eb) =>
               eb.or([
-                eb("selectionRounds.state", "=", "suggesting"),
-                eb("selectionRounds.state", "=", "voting"),
+                eb("selectionRound.state", "=", "suggesting"),
+                eb("selectionRound.state", "=", "voting"),
               ]),
             ),
         )
         .as("hasOpenSelectionRound"),
     ])
-    .where("clubs.id", "=", clubId)
+    .where("club.id", "=", clubId)
     .executeTakeFirst();
 }
 

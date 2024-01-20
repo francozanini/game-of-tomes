@@ -30,6 +30,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const data = body.data;
 
   if (body.type === "user.created") {
+    console.log("creating user", data);
     const firstEmail = data.email_addresses[0].email_address;
     await createUser({
       id: data.id,
@@ -39,16 +40,17 @@ export async function action({ request }: ActionFunctionArgs) {
     });
     console.log("created user");
   } else if (body.type === "user.updated") {
+    console.log("updating user", data);
     const firstEmail = data.email_addresses[0].email_address;
     await updateUser(data.id, {
       email: firstEmail,
       username: data.username || firstEmail,
       imageUrl: data.image_url,
     });
-    console.log("updated user");
+    console.log("updated user", data);
   } else if (body.type === "user.deleted") {
     await deleteUser(data.id);
-    console.log("deleted user");
+    console.log("deleted user", data);
   } else throw new Error("Unknown event type");
 
   return new Response("ok", { status: 200 });

@@ -20,23 +20,23 @@ export async function loader(args: LoaderFunctionArgs) {
   const round = await db
     .selectFrom(SELECTION_ROUNDS)
     .select((eb) => [
-      "selectionRounds.id as id",
+      "selectionRound.id as id",
       "state",
       "clubId",
       eb
         .exists(
           eb
             .selectFrom(CLUB_MEMBERS)
-            .whereRef("clubId", "=", "clubMembers.clubId")
+            .whereRef("clubId", "=", "clubMember.clubId")
             .where("userId", "=", userId!)
-            .select(["clubMembers.userId"]),
+            .select(["clubMember.userId"]),
         )
         .as("userIsMember"),
     ])
-    .leftJoin(CLUBS, "clubs.id", "clubId")
+    .leftJoin(CLUBS, "club.id", "clubId")
     .where((eb) =>
       eb.and([
-        eb("selectionRounds.id", "=", invitationId),
+        eb("selectionRound.id", "=", invitationId),
         eb("inviteToken", "=", inviteToken),
       ]),
     )
@@ -46,7 +46,7 @@ export async function loader(args: LoaderFunctionArgs) {
     return redirect("/404");
   }
 
-  if (round.state === "closed") {
+  if (round.state === "finished") {
     throw new Error("Round is closed");
   }
 

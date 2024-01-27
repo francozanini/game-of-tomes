@@ -12,6 +12,7 @@ import {
 import "~/globals.css";
 import { NonFlashOfWrongThemeEls, ThemeProvider, useTheme } from "~/theme";
 import { clsx } from "clsx";
+import { Toaster } from "../@/components/ui/sonner";
 
 export const loader: LoaderFunction = (args) =>
   rootAuthLoader(args, { loadUser: true });
@@ -33,6 +34,7 @@ function App() {
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
+        <Toaster />
       </body>
     </html>
   );

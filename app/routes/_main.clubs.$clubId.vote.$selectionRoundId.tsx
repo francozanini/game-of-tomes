@@ -1,10 +1,20 @@
-import { json, LoaderFunctionArgs, redirect } from "@remix-run/node";
+import {
+  ActionFunctionArgs,
+  json,
+  LoaderFunctionArgs,
+  redirect,
+} from "@remix-run/node";
 import { requireAuthenticated } from "~/.server/auth/guards";
 import { findClub } from "~/.server/model/clubs";
 import { findSelectionRound } from "~/.server/model/selectionRounds";
 import invariant from "~/utils/invariant";
 import { Book, fetchBooksByIds } from "~/.server/google-books/api";
-import { useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  useActionData,
+  useLoaderData,
+  useNavigation,
+} from "@remix-run/react";
 import {
   Card,
   CardContent,
@@ -17,17 +27,19 @@ import {
   AvatarImage,
 } from "../../@/components/ui/avatar";
 import { Button } from "../../@/components/ui/button";
-import { useDrag, useDrop } from "react-dnd";
-import { useRef, useState } from "react";
-import { XYCoord, Identifier } from "dnd-core";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { useState } from "react";
+import { Reorder } from "framer-motion";
+import { withZod } from "@remix-validated-form/with-zod";
+import { z } from "zod";
+import { registerOrChangeVotes } from "~/.server/model/votes";
 
-export async function loader(args: LoaderFunctionArgs) {
-  const { userId } = await requireAuthenticated(args);
+async function validateClubMembershipAndVotableRound(
+  args: ActionFunctionArgs,
+  userId: string,
+) {
   const { clubId, selectionRoundId } = args.params;
   invariant(clubId, "clubId is required");
   invariant(selectionRoundId, "selectionRoundId is required");
-
   const currentRoundPromise = findSelectionRound(+selectionRoundId);
   const club = await findClub(+clubId, userId);
   const currentRound = await currentRoundPromise;
@@ -36,7 +48,7 @@ export async function loader(args: LoaderFunctionArgs) {
   invariant(currentRound, "Round not found");
 
   if (!club.isMember) {
-    return redirect(`/clubs/${clubId}/join`);
+    throw redirect(`/clubs/${clubId}/join`);
   }
 
   if (currentRound.clubId !== +clubId) {
@@ -46,6 +58,16 @@ export async function loader(args: LoaderFunctionArgs) {
   if (currentRound.state !== "voting") {
     throw new Error("Not time to vote yet");
   }
+
+  return { club, currentRound };
+}
+
+export async function loader(args: LoaderFunctionArgs) {
+  const { userId } = await requireAuthenticated(args);
+  const { club, currentRound } = await validateClubMembershipAndVotableRound(
+    args,
+    userId,
+  );
 
   const suggestedBooksSoFar = await fetchBooksByIds(
     currentRound.booksSuggested.map((b) => b.bookId),
@@ -62,104 +84,44 @@ export async function loader(args: LoaderFunctionArgs) {
   return json({ suggestedBooksSoFar, club, currentRound });
 }
 
-interface DragBook {
-  index: number;
-  dragId: number;
+export async function action(args: ActionFunctionArgs) {
+  const { userId } = await requireAuthenticated(args);
+  const validationResult = await votesValidator.validate(
+    await args.request.formData(),
+  );
+
+  if (validationResult.error) {
+    console.error(validationResult.error);
+    throw new Error("Invalid form data");
+  }
+
+  const { club, currentRound } = await validateClubMembershipAndVotableRound(
+    args,
+    userId,
+  );
+
+  const votes = Array.from(
+    new Set(validationResult.data.votes.map((vote) => vote.bookId)),
+  );
+
+  const persistedVotes = await registerOrChangeVotes(
+    votes,
+    currentRound.id,
+    club.id,
+    userId,
+  );
+
+  if (persistedVotes.length !== votes.length) {
+    return json({ message: "Your votes could not be saved" });
+  }
+
+  return json({ message: "Your votes have been saved" });
 }
 
-function VotingCard({
-  book,
-  index,
-  reorderVotes,
-}: {
-  book: Book & { dragId: number };
-  index: number;
-  reorderVotes: Function;
-}) {
+function VotingCard({ book }: { book: Book }) {
   const { volumeInfo } = book;
-  const ref = useRef<HTMLDivElement>();
-
-  const bookItem = "bookItem";
-
-  const [{ handlerId }, drop] = useDrop<
-    DragBook,
-    void,
-    { handlerId: Identifier | null }
-  >({
-    accept: bookItem,
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId(),
-      };
-    },
-    hover(item: DragBook, monitor) {
-      if (!ref.current) {
-        return;
-      }
-
-      const dragIndex = item.index;
-      const hoverIndex = index;
-
-      // Don't replace items with themselves
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-
-      // Determine rectangle on screen
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-
-      // Get vertical middle
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-
-      // Determine mouse position
-      const clientOffset = monitor.getClientOffset();
-
-      // Get pixels to the top
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
-
-      // Dragging downwards
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-
-      // Dragging upwards
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-
-      // Time to actually perform the action
-      reorderVotes(dragIndex, hoverIndex);
-
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
-      item.index = hoverIndex;
-    },
-  });
-
-  const [{ opacity }, drag] = useDrag(() => ({
-    type: bookItem,
-    item: () => ({ index, dragId: book.dragId }),
-    collect: (monitor) => ({
-      opacity: monitor.isDragging() ? 0.5 : 1,
-    }),
-  }));
-
-  drag(drop(ref));
-
   return (
-    <Card
-      ref={ref}
-      data-handler-id={handlerId}
-      style={{ opacity }}
-      className="hover:border-red-900"
-    >
+    <Card className="hover:border-gray-900">
       <CardContent className="flex flex-row items-center justify-between p-4">
         <div className="flex flex-row items-center space-x-2">
           <Avatar>
@@ -186,22 +148,20 @@ function VotingCard({
   );
 }
 
+const votesValidator = withZod(
+  z.object({
+    votes: z.array(z.object({ bookId: z.string() })),
+  }),
+);
+
 export default function Voting() {
   const { club, currentRound, suggestedBooksSoFar } =
     useLoaderData<typeof loader>();
-  const [booksInVotingOrder, setBooksInVotingOrder] = useState(
-    suggestedBooksSoFar.map((b, index) => ({ ...b, dragId: index })),
-  );
-
-  const reorderVotes = (dragIndex: number, hoverIndex: number) => {
-    const dragBook = booksInVotingOrder[dragIndex];
-    const newBooks = [...booksInVotingOrder];
-    newBooks.splice(dragIndex, 1);
-    newBooks.splice(hoverIndex, 0, dragBook);
-    setBooksInVotingOrder(newBooks);
-  };
-
-  const [animateRef] = useAutoAnimate();
+  const [booksInVotingOrder, setBooksInVotingOrder] =
+    useState(suggestedBooksSoFar);
+  const { state: navigationState } = useNavigation();
+  const data = useActionData<typeof action>();
+  const isSubmitting = navigationState === "submitting";
 
   return (
     <div className="container mt-4 space-y-4">
@@ -212,20 +172,42 @@ export default function Voting() {
           <CardHeader className="text-center">
             <h2 className="text-xl font-bold">Suggested books</h2>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4" ref={animateRef}>
-            {booksInVotingOrder.map((book, index) => (
-              <VotingCard
-                key={book.id}
-                book={book}
-                index={index}
-                reorderVotes={reorderVotes}
-              />
-            ))}
+          <CardContent>
+            <Reorder.Group
+              className="flex flex-col gap-2"
+              onReorder={setBooksInVotingOrder}
+              values={booksInVotingOrder}
+            >
+              {booksInVotingOrder.map((book, index) => (
+                <Reorder.Item value={book} key={book.id}>
+                  <VotingCard key={book.id} book={book} />
+                </Reorder.Item>
+              ))}
+            </Reorder.Group>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full font-semibold uppercase">
-              Submit
-            </Button>
+            <Form className="w-full" method="post">
+              <input
+                type="hidden"
+                name="selectionRoundId"
+                value={currentRound.id}
+              />
+              {booksInVotingOrder.map((book, index) => (
+                <input
+                  key={book.id}
+                  type="hidden"
+                  name={`votes[${index}].bookId`}
+                  value={book.id}
+                />
+              ))}
+              <Button
+                type="submit"
+                className="w-full font-semibold uppercase"
+                disabled={isSubmitting}
+              >
+                Submit
+              </Button>
+            </Form>
           </CardFooter>
         </Card>
       </div>

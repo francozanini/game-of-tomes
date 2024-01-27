@@ -65,6 +65,7 @@ export type Book = {
       type: string;
       identifier: string;
     }[];
+    description: string;
   };
   language: string;
   saleInfo: {

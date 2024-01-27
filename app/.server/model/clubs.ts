@@ -14,6 +14,15 @@ function withIsMember(userId: string) {
     .as("isMember");
 }
 
+export async function userIsMemberOfClub(userId: string, clubId: number) {
+  return db
+    .selectFrom(CLUB_MEMBERS)
+    .select((eb) => eb.exists("userId").as("isMember"))
+    .where("clubMember.clubId", "=", clubId)
+    .where("clubMember.userId", "=", userId)
+    .executeTakeFirst();
+}
+
 export async function findClubsAndComputeUserMembership(userId: string) {
   return await db
     .selectFrom(CLUBS)
@@ -30,19 +39,16 @@ export async function findClub(clubId: number, userId: string) {
       "club.description",
       withIsMember(userId),
       eb
-        .exists(
-          eb
-            .selectFrom(SELECTION_ROUNDS)
-            .selectAll()
-            .where("selectionRound.clubId", "=", clubId)
-            .where((eb) =>
-              eb.or([
-                eb("selectionRound.state", "=", "suggesting"),
-                eb("selectionRound.state", "=", "voting"),
-              ]),
-            ),
+        .selectFrom(SELECTION_ROUNDS)
+        .select("selectionRound.state")
+        .where("selectionRound.clubId", "=", clubId)
+        .where((eb) =>
+          eb.or([
+            eb("selectionRound.state", "=", "suggesting"),
+            eb("selectionRound.state", "=", "voting"),
+          ]),
         )
-        .as("hasOpenSelectionRound"),
+        .as("selectionRoundState"),
     ])
     .where("club.id", "=", clubId)
     .executeTakeFirst();

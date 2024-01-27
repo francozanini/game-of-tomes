@@ -1,7 +1,8 @@
 import { db } from "~/.server/model/db";
-import { SELECTION_ROUNDS } from "~/.server/model/tables";
+import { BOOK_SUGGESTIONS, SELECTION_ROUNDS } from "~/.server/model/tables";
 import { Transaction } from "kysely";
 import { DB } from "kysely-codegen";
+import { jsonArrayFrom } from "kysely/helpers/postgres";
 
 export async function startOrAdvanceSelectionRound(clubId: number) {
   return db.transaction().execute(async (trx) => {
@@ -29,9 +30,31 @@ export async function startOrAdvanceSelectionRound(clubId: number) {
       .set({ state: nextState })
       .where("id", "=", activeRound.id)
       .returning(invitationSelections)
-      .from(SELECTION_ROUNDS)
       .executeTakeFirstOrThrow();
   });
+}
+
+export async function findSelectionRound(selectionRoundId: number) {
+  return db
+    .selectFrom(SELECTION_ROUNDS)
+    .select((eb) => [
+      "id",
+      "clubId",
+      "state",
+      jsonArrayFrom(
+        eb
+          .selectFrom(BOOK_SUGGESTIONS)
+          .select([
+            "bookSuggestion.bookId",
+            "bookSuggestion.userId",
+            "bookSuggestion.addedAt",
+          ])
+          .where("selectionRoundId", "=", eb.ref("selectionRound.id"))
+          .orderBy("addedAt", "desc"),
+      ).as("booksSuggested"),
+    ])
+    .where("id", "=", selectionRoundId)
+    .executeTakeFirst();
 }
 
 function randomString(length: number): string {

@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from "../../@/components/ui/card";
 import { invitationLink, InvitationLink } from "~/components/InvitationLink";
-import { DB, SelectionRound, SelectionRoundState } from "kysely-codegen";
+import { SelectionRoundState } from "kysely-codegen";
 
 const loaderSchema = z.object({
   clubId: z.string().transform((val) => parseInt(val, 10)),
@@ -89,7 +89,7 @@ export default function Club() {
                 ? "Start suggestion round"
                 : nextStep === "voting"
                   ? "Start voting"
-                  : "Start round"}
+                  : "Finish Voting"}
             </Button>
           </Form>
 

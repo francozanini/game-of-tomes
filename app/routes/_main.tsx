@@ -9,10 +9,12 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/remix";
 import { Outlet } from "@remix-run/react";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { Theme, useTheme } from "~/theme";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 export default function IndexLayout() {
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
       <header className="border-b border-border/40">
         <div className="container flex max-w-screen-2xl flex-row items-center justify-between">
           <div className="flex h-14 flex-row items-center gap-4">
@@ -36,7 +38,7 @@ export default function IndexLayout() {
         </div>
       </header>
       <Outlet />
-    </>
+    </DndProvider>
   );
 }
 

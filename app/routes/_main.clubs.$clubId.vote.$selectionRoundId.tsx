@@ -130,7 +130,7 @@ function VotingCard({ book, rank }: { book: Book; rank: number }) {
   return (
     <Card className="hover:border-gray-900">
       <CardContent className="flex flex-row items-center justify-between p-4">
-        <Avatar>
+        <Avatar className="h-[32px] w-[32px]">
           <AvatarImage
             className="object-cover"
             src={
@@ -145,14 +145,14 @@ function VotingCard({ book, rank }: { book: Book; rank: number }) {
           <AvatarFallback>Cover</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <h3 className="break-all text-center font-bold">
+          <h3 className="break-all text-center text-xs font-bold">
             {volumeInfo.title}
           </h3>
-          <h4 className="text-center text-sm">
+          <h4 className="text-center text-xs text-muted-foreground">
             {volumeInfo.authors?.join(", ")}
           </h4>
         </div>
-        <Avatar>
+        <Avatar className="h-[32px] w-[32px]">
           <AvatarFallback>{rank}</AvatarFallback>
         </Avatar>
       </CardContent>

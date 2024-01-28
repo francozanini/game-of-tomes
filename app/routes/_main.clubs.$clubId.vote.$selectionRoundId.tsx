@@ -125,31 +125,36 @@ export async function action(args: ActionFunctionArgs) {
   return json({ message: "Your votes have been saved" });
 }
 
-function VotingCard({ book }: { book: Book }) {
+function VotingCard({ book, rank }: { book: Book; rank: number }) {
   const { volumeInfo } = book;
   return (
     <Card className="hover:border-gray-900">
       <CardContent className="flex flex-row items-center justify-between p-4">
-        <div className="flex flex-row items-center space-x-2">
-          <Avatar>
-            <AvatarImage
-              className="object-fit"
-              src={
-                volumeInfo.imageLinks?.smallThumbnail ||
-                volumeInfo.imageLinks?.thumbnail ||
-                volumeInfo.imageLinks?.small ||
-                volumeInfo.imageLinks?.medium ||
-                volumeInfo.imageLinks?.large ||
-                volumeInfo.imageLinks?.extraLarge
-              }
-            />
-            <AvatarFallback>Cover</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <h3 className="font-bold">{volumeInfo.title}</h3>
-            <h4 className="text-sm">{volumeInfo.authors?.join(", ")}</h4>
-          </div>
+        <Avatar>
+          <AvatarImage
+            className="object-cover"
+            src={
+              volumeInfo.imageLinks?.smallThumbnail ||
+              volumeInfo.imageLinks?.thumbnail ||
+              volumeInfo.imageLinks?.small ||
+              volumeInfo.imageLinks?.medium ||
+              volumeInfo.imageLinks?.large ||
+              volumeInfo.imageLinks?.extraLarge
+            }
+          />
+          <AvatarFallback>Cover</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <h3 className="break-all text-center font-bold">
+            {volumeInfo.title}
+          </h3>
+          <h4 className="text-center text-sm">
+            {volumeInfo.authors?.join(", ")}
+          </h4>
         </div>
+        <Avatar>
+          <AvatarFallback>{rank}</AvatarFallback>
+        </Avatar>
       </CardContent>
     </Card>
   );
@@ -183,9 +188,9 @@ export default function Voting() {
               onReorder={setBooksInVotingOrder}
               values={booksInVotingOrder}
             >
-              {booksInVotingOrder.map((book) => (
+              {booksInVotingOrder.map((book, index) => (
                 <Reorder.Item value={book} key={book.id}>
-                  <VotingCard key={book.id} book={book} />
+                  <VotingCard key={book.id} book={book} rank={index + 1} />
                 </Reorder.Item>
               ))}
             </Reorder.Group>

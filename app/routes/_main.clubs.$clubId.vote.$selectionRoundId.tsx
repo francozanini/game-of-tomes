@@ -31,7 +31,7 @@ import { useState } from "react";
 import { Reorder } from "framer-motion";
 import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
-import { registerOrChangeVotes } from "~/.server/model/votes";
+import { findVotes, registerOrChangeVotes } from "~/.server/model/votes";
 
 async function validateClubMembershipAndVotableRound(
   args: ActionFunctionArgs,
@@ -69,9 +69,16 @@ export async function loader(args: LoaderFunctionArgs) {
     userId,
   );
 
-  const suggestedBooksSoFar = await fetchBooksByIds(
-    currentRound.booksSuggested.map((b) => b.bookId),
-  ).then((books) =>
+  let currentVotes = (await findVotes(userId, currentRound.id)).map(
+    (b) => b.bookId,
+  );
+
+  currentVotes =
+    currentVotes.length > 0
+      ? currentVotes
+      : currentRound.booksSuggested.map((b) => b.bookId);
+
+  const votingOptions = await fetchBooksByIds(currentVotes).then((books) =>
     books.map((book) => {
       const suggestion = currentRound.booksSuggested.find(
         (s) => s.bookId === book.id,
@@ -81,7 +88,7 @@ export async function loader(args: LoaderFunctionArgs) {
     }),
   );
 
-  return json({ suggestedBooksSoFar, club, currentRound });
+  return json({ votingOptions, club, currentRound });
 }
 
 export async function action(args: ActionFunctionArgs) {
@@ -155,10 +162,8 @@ const votesValidator = withZod(
 );
 
 export default function Voting() {
-  const { club, currentRound, suggestedBooksSoFar } =
-    useLoaderData<typeof loader>();
-  const [booksInVotingOrder, setBooksInVotingOrder] =
-    useState(suggestedBooksSoFar);
+  const { club, currentRound, votingOptions } = useLoaderData<typeof loader>();
+  const [booksInVotingOrder, setBooksInVotingOrder] = useState(votingOptions);
   const { state: navigationState } = useNavigation();
   const data = useActionData<typeof action>();
   const isSubmitting = navigationState === "submitting";
@@ -178,7 +183,7 @@ export default function Voting() {
               onReorder={setBooksInVotingOrder}
               values={booksInVotingOrder}
             >
-              {booksInVotingOrder.map((book, index) => (
+              {booksInVotingOrder.map((book) => (
                 <Reorder.Item value={book} key={book.id}>
                   <VotingCard key={book.id} book={book} />
                 </Reorder.Item>

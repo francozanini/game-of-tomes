@@ -1,5 +1,9 @@
 import { db } from "~/.server/model/db";
-import { BOOK_SUGGESTIONS, SELECTION_ROUNDS } from "~/.server/model/tables";
+import {
+  BOOK_SUGGESTIONS,
+  SELECTION_ROUNDS,
+  VOTES,
+} from "~/.server/model/tables";
 import { Transaction } from "kysely";
 import { DB } from "kysely-codegen";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
@@ -86,4 +90,24 @@ export function activeSelectionRound(clubId: number, trx?: Transaction<DB>) {
     .where("state", "in", ["suggesting", "voting"])
     .orderBy("createdAt", "desc")
     .executeTakeFirst();
+}
+
+export function allRounds(clubId: number) {
+  return db
+    .selectFrom(SELECTION_ROUNDS)
+    .select((eb) => [
+      "id",
+      "state",
+      "createdAt",
+      "selectedBookId",
+      jsonArrayFrom(
+        eb
+          .selectFrom(VOTES)
+          .selectAll()
+          .whereRef("vote.votingRound", "=", "selectionRound.id"),
+      ).as("votes"),
+    ])
+    .where("clubId", "=", clubId)
+    .orderBy("createdAt", "desc")
+    .execute();
 }

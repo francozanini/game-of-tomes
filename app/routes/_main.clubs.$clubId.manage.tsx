@@ -6,6 +6,7 @@ import { zfd } from "zod-form-data";
 import { z } from "zod";
 import {
   activeSelectionRound,
+  allRounds,
   startOrAdvanceSelectionRound,
 } from "~/.server/model/selectionRounds";
 import { requireAuthenticated } from "~/.server/auth/guards";
@@ -18,6 +19,18 @@ import {
 } from "../../@/components/ui/card";
 import { invitationLink, InvitationLink } from "~/components/InvitationLink";
 import { SelectionRoundState } from "kysely-codegen";
+import { useReactTable } from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../@/components/ui/table";
+import React from "react";
+import { fetchBook, fetchBooksByIds } from "~/.server/google-books/api";
+import { calculateWinner } from "~/.server/model/votes";
 
 const loaderSchema = z.object({
   clubId: z.string().transform((val) => parseInt(val, 10)),
@@ -28,6 +41,27 @@ export async function loader(args: LoaderFunctionArgs) {
   const { clubId } = loaderSchema.parse(args.params);
 
   const currentRound = activeSelectionRound(clubId);
+  const allRoundsPromise = allRounds(clubId).then(async (rounds) => {
+    const roundsWithWinners = [];
+    for (const round of rounds) {
+      if (round.state === "finished") {
+        const winner = calculateWinner(round.votes);
+        if (winner) {
+          const book = await fetchBook(winner.bookId);
+          roundsWithWinners.push({
+            ...round,
+            winnerName: book.volumeInfo.title,
+          });
+        } else {
+          roundsWithWinners.push({ ...round, winnerName: "-" });
+        }
+      } else {
+        roundsWithWinners.push({ ...round, winnerName: "-" });
+      }
+    }
+
+    return roundsWithWinners;
+  });
 
   const clubAndMembership = await findClub(clubId, userId);
 
@@ -35,7 +69,11 @@ export async function loader(args: LoaderFunctionArgs) {
     throw new Response("Not found", { status: 404 });
   }
 
-  return json({ club: clubAndMembership, currentRound: await currentRound });
+  return json({
+    club: clubAndMembership,
+    currentRound: await currentRound,
+    allRounds: await allRoundsPromise,
+  });
 }
 
 const roundSchema = zfd.formData({
@@ -53,7 +91,7 @@ export async function action(args: ActionFunctionArgs) {
 }
 
 export default function Club() {
-  const { club, currentRound } = useLoaderData<typeof loader>();
+  const { club, currentRound, allRounds } = useLoaderData<typeof loader>();
   const invitation =
     useActionData<typeof action>()?.invitation ||
     (currentRound && {
@@ -73,7 +111,7 @@ export default function Club() {
   const nextStep = nextRoundStep(currentRound?.state);
 
   return (
-    <main className="container mt-2">
+    <main className="container mt-2 space-y-8">
       <Card>
         <CardHeader>
           <CardTitle className="text-lg font-bold">{club.name}</CardTitle>
@@ -104,6 +142,39 @@ export default function Club() {
           )}
         </CardFooter>
       </Card>
+      <div className="space-y-2">
+        <h2 className="text-center text-2xl font-bold">Previous rounds</h2>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Id</TableHead>
+                <TableHead>State</TableHead>
+                <TableHead>Created at</TableHead>
+                <TableHead>Winner</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {allRounds.length ? (
+                allRounds.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell>{row.id}</TableCell>
+                    <TableCell className="uppercase">{row.state}</TableCell>
+                    <TableCell>{row.createdAt}</TableCell>
+                    <TableCell>{row.winnerName}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-24 text-center">
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
     </main>
   );
 }

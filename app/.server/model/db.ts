@@ -6,12 +6,7 @@ import type { DB } from "kysely-codegen";
 function createKyselyPostgres() {
   const dialect = new PostgresDialect({
     pool: new Pool({
-      database: "game_of_tomes",
-      host: "127.0.0.1",
-      user: "admin",
-      password: "S3cret",
-      port: 5432,
-      max: 10,
+      connectionString: process.env.DATABASE_URL,
     }),
   });
   return new Kysely<DB>({

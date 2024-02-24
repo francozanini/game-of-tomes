@@ -12,7 +12,7 @@ export async function loader(args: LoaderFunctionArgs) {
   invariant(inviteToken, "inviteToken is required");
   const invitationId = parseInt(invitationIdRaw, 10);
 
-  const { userId } = currentUserOrRedirect(
+  const { userId } = await currentUserOrRedirect(
     args,
     `/invite/${invitationId}/${inviteToken}`,
   );

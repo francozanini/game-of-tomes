@@ -103,7 +103,7 @@ export default function Club() {
   function copyLinkToClipboard() {
     if (invitation) {
       navigator.clipboard.writeText(
-        `${location.origin}/${invitationLink(invitation)}`,
+        `${location.origin}${invitationLink(invitation)}`,
       );
     }
   }

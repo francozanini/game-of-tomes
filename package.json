@@ -12,7 +12,7 @@
     "migrate": "tsx app/.server/model/migrator.ts migrateToLatest",
     "rollback": "tsx app/.server/model/migrator.ts rollbackLatest",
     "recreateDb": "tsx app/.server/model/migrator.ts recreate",
-    "codegen": "kysely-codegen"
+    "codegen": "kysely-codegen --dialect postgres"
   },
   "dependencies": {
     "@clerk/remix": "3.1.18",

@@ -80,10 +80,10 @@ export async function up(kysely: Kysely<any>) {
 }
 
 export async function down(kysely: Kysely<any>) {
-  await kysely.schema.dropTable(CLUBS).execute();
-  await kysely.schema.dropTable(BOOKS).execute();
-  await kysely.schema.dropTable(CLUB_MEMBERS).execute();
-  await kysely.schema.dropTable(BOOK_SUGGESTIONS).execute();
-  await kysely.schema.dropTable(VOTES).execute();
-  await kysely.schema.dropTable(BOOK_SELECTIONS).execute();
+  await kysely.schema.dropTable(CLUBS).cascade().execute();
+  await kysely.schema.dropTable(BOOKS).cascade().execute();
+  await kysely.schema.dropTable(CLUB_MEMBERS).cascade().execute();
+  await kysely.schema.dropTable(BOOK_SUGGESTIONS).cascade().execute();
+  await kysely.schema.dropTable(VOTES).cascade().execute();
+  await kysely.schema.dropTable(BOOK_SELECTIONS).cascade().execute();
 }

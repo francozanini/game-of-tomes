@@ -15,3 +15,7 @@ export async function up(kysely: Kysely<DB>) {
     })
     .execute();
 }
+
+export async function down(kysely: Kysely<DB>) {
+  await kysely.deleteFrom(CLUBS).where("name", "=", "Game of Tomes").execute();
+}

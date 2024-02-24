@@ -33,6 +33,8 @@ export async function action(args: ActionFunctionArgs) {
   invariant(clubIdString, "Club ID must be provided");
   const clubId = parseInt(clubIdString as string, 10);
 
+  console.log(userId);
+
   await joinClub(userId, clubId);
 
   return json({ message: "Joined club" });

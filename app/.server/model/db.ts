@@ -2,7 +2,6 @@ import Pool from "pg-pool";
 import { Kysely, PostgresDialect } from "kysely";
 import { singleton } from "~/utils/singleton.server";
 import type { DB } from "kysely-codegen";
-import "dotenv/config";
 
 function createKyselyPostgres() {
   const dialect = new PostgresDialect({

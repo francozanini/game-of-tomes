@@ -14,10 +14,10 @@ import {
   joinClub,
 } from "~/.server/model/clubs";
 import invariant from "~/utils/invariant";
+import { currentUserOrRedirect } from "~/.server/auth/guards";
 
 export async function loader(args: LoaderFunctionArgs) {
-  const { userId } = await getAuth(args);
-  invariant(userId, "User must be signed in to join a club");
+  const { userId } = await currentUserOrRedirect(args, "/clubs");
 
   const clubs = await findClubsAndComputeUserMembership(userId);
 

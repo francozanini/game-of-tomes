@@ -25,7 +25,7 @@ export async function action({ request }: ActionFunctionArgs) {
     return new Response("Cannot verify", { status: 400 });
   }
 
-  const body = (await request.json()) as UserEvent;
+  const body = verification.event as UserEvent;
 
   const data = body.data;
 
@@ -129,11 +129,9 @@ type UserDeletedEvent = {
 
 type UserEvent = UserCreatedEvent | UserUpdatedEvent | UserDeletedEvent;
 
-async function verifySignature(
-  request: Request,
-): Promise<"success" | "missingHeaders" | "cannotVerify"> {
+async function verifySignature(request: Request) {
   if (!env().production) {
-    return "success";
+    return { res: "success", event: await request.json() } as const;
   }
 
   const headers = request.headers;
@@ -141,24 +139,26 @@ async function verifySignature(
   const svixSignature = headers.get("svix-signature");
   const svixTimestamp = headers.get("svix-timestamp");
 
+  console.info("svix headers", svixId, svixSignature, svixTimestamp);
+
   if (!svixId || !svixSignature || !svixTimestamp) {
     console.error("Missing headers", svixId, svixSignature, svixTimestamp);
-    return "missingHeaders";
+    return "missingHeaders" as const;
   }
 
   const wh = new Webhook(env().webhookSecret);
   let whEvent;
 
   try {
-    whEvent = (await wh.verify(await request.json(), {
+    whEvent = (await wh.verify(await request.text(), {
       "svix-id": svixId,
       "svix-signature": svixSignature,
       "svix-timestamp": svixTimestamp,
     })) as WebhookEvent;
 
-    return "success";
+    return { res: "success", event: whEvent } as const;
   } catch (err) {
     console.error("Cannot verify", err);
-    return "cannotVerify";
+    return "cannotVerify" as const;
   }
 }

@@ -1,4 +1,8 @@
-import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  redirect,
+} from "@remix-run/node";
 import { invariant } from "@remix-run/router/history";
 import { getAuth } from "@clerk/remix/ssr.server";
 
@@ -7,5 +11,16 @@ export async function requireAuthenticated(
 ) {
   const auth = await getAuth(args);
   invariant(auth.userId, "User must be signed in to start voting round");
+  return auth;
+}
+
+export async function currentUserOrRedirect(
+  args: LoaderFunctionArgs,
+  redirectPath: string,
+) {
+  const auth = await getAuth(args);
+  if (!auth.userId) {
+    throw redirect(`/sign-in?redirect=${redirectPath}`);
+  }
   return auth;
 }

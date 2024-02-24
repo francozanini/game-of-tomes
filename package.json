@@ -15,7 +15,7 @@
     "codegen": "kysely-codegen"
   },
   "dependencies": {
-    "@clerk/remix": "^3.1.13",
+    "@clerk/remix": "3.1.18",
     "@formkit/auto-animate": "^0.8.1",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",

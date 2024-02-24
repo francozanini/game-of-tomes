@@ -14,7 +14,7 @@ export async function loader(args: LoaderFunctionArgs) {
   const { userId } = await getAuth(args);
 
   if (!userId) {
-    return redirect(`/sign-in?redirect=/invite/${invitationId}/${inviteToken}`);
+    return redirect(`/signin?redirect=/invite/${invitationId}/${inviteToken}`);
   }
 
   const round = await db

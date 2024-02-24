@@ -2,7 +2,7 @@ import { bookCache } from "~/.server/google-books/bookCache";
 
 export async function fetchBooks(searchTerm: string) {
   return await fetch(
-    `https://www.googleapis.com/books/v1/volumes?q=${searchTerm}&maxResults=40&printType=books`,
+    `https://www.googleapis.com/books/v1/volumes?q=${searchTerm}&maxResults=40&printType=books&langRestrict=en&orderBy=relevance`,
   )
     .then((res) => res.json() as Promise<BooksResponse>)
     .then((res) =>

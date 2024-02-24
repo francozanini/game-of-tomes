@@ -29,7 +29,7 @@ function BookCard({
         className="m-auto my-2"
       />
       <CardHeader>
-        <CardTitle>{volumeInfo.title}</CardTitle>
+        <CardTitle className={"word-break"}>{volumeInfo.title}</CardTitle>
         <CardDescription>by {volumeInfo.authors?.join(", ")}</CardDescription>
       </CardHeader>
       <CardFooter className="flex gap-2">
@@ -62,7 +62,7 @@ export function BookCardList({ books }: { books: Book[] }) {
 
   const [ref] = useAutoAnimate();
   return (
-    <div className="flex flex-row gap-4" ref={ref}>
+    <div className="flex flex-row flex-wrap gap-4" ref={ref}>
       {adding && <Skeleton className="h-80 w-52" />}
       {books.map((book) => (
         <BookCard

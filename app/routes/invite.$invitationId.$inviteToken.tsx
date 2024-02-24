@@ -1,5 +1,6 @@
 import { getAuth } from "@clerk/remix/ssr.server";
 import { LoaderFunctionArgs, redirect } from "@remix-run/node";
+import { currentUserOrRedirect } from "~/.server/auth/guards";
 import { joinClub } from "~/.server/model/clubs";
 import { db } from "~/.server/model/db";
 import { CLUB_MEMBERS, CLUBS, SELECTION_ROUNDS } from "~/.server/model/tables";
@@ -11,11 +12,10 @@ export async function loader(args: LoaderFunctionArgs) {
   invariant(inviteToken, "inviteToken is required");
   const invitationId = parseInt(invitationIdRaw, 10);
 
-  const { userId } = await getAuth(args);
-
-  if (!userId) {
-    return redirect(`/signin?redirect=/invite/${invitationId}/${inviteToken}`);
-  }
+  const { userId } = currentUserOrRedirect(
+    args,
+    `/invite/${invitationId}/${inviteToken}`,
+  );
 
   const round = await db
     .selectFrom(SELECTION_ROUNDS)

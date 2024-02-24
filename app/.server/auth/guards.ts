@@ -18,9 +18,15 @@ export async function currentUserOrRedirect(
   args: LoaderFunctionArgs,
   redirectPath: string,
 ) {
-  const auth = await getAuth(args);
-  if (!auth.userId) {
-    throw redirect(`/sign-in?redirect=${redirectPath}`);
+  const redirect = `/signin?redirect=${redirectPath}`;
+
+  try {
+    const auth = await getAuth(args);
+    if (!auth.userId) {
+      throw redirect(redirect);
+    }
+    return auth;
+  } catch (e) {
+    throw redirect(redirect);
   }
-  return auth;
 }

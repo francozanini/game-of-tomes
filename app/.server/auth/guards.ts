@@ -21,7 +21,10 @@ export async function currentUserOrRedirect(
   const fullRedirect = `/signin?redirect=${redirectPath}`;
 
   try {
-    const auth = await getAuth(args);
+    const auth = await getAuth(args, {
+      apiKey: process.env.CLERK_API_KEY,
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
     if (!auth.userId) {
       console.log(
         "redirecting to",

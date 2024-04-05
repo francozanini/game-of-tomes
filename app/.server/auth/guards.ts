@@ -23,6 +23,12 @@ export async function currentUserOrRedirect(
   try {
     const auth = await getAuth(args);
     if (!auth.userId) {
+      console.log(
+        "redirecting to",
+        fullRedirect,
+        "because user is not signed in",
+        args,
+      );
       throw redirect(fullRedirect);
     }
     return auth;

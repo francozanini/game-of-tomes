@@ -1,4 +1,4 @@
-import { ClerkApp, ClerkErrorBoundary } from "@clerk/remix";
+import { ClerkApp } from "@clerk/remix";
 import { rootAuthLoader } from "@clerk/remix/ssr.server";
 import type { LoaderFunction } from "@remix-run/node";
 import {
@@ -45,7 +45,5 @@ function AppWithProviders() {
     </ThemeProvider>
   );
 }
-
-export const ErrorBoundary = ClerkErrorBoundary();
 
 export default ClerkApp(AppWithProviders);

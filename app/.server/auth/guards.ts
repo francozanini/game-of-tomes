@@ -22,7 +22,6 @@ export async function currentUserOrRedirect(
 
   try {
     const auth = await getAuth(args, {
-      apiKey: process.env.CLERK_API_KEY,
       secretKey: process.env.CLERK_SECRET_KEY,
     });
     if (!auth.userId) {

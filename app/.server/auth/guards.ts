@@ -9,7 +9,7 @@ import { getAuth } from "@clerk/remix/ssr.server";
 export async function requireAuthenticated(
   args: ActionFunctionArgs | LoaderFunctionArgs,
 ) {
-  const auth = await getAuth(args);
+  const auth = await getAuth(args, { secretKey: process.env.CLERK_SECRET_KEY });
   invariant(auth.userId, "User must be signed in to start voting round");
   return auth;
 }

@@ -142,39 +142,39 @@ export default function Club() {
           )}
         </CardFooter>
       </Card>
-      <div className="space-y-2">
-        <h2 className="text-center text-2xl font-bold">Previous rounds</h2>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Id</TableHead>
-                <TableHead>State</TableHead>
-                <TableHead>Created at</TableHead>
-                <TableHead>Winner</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {allRounds.length ? (
-                allRounds.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell>{row.id}</TableCell>
-                    <TableCell className="uppercase">{row.state}</TableCell>
-                    <TableCell>{row.createdAt}</TableCell>
-                    <TableCell>{row.winnerName}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+      {/*<div className="space-y-2">*/}
+      {/*  <h2 className="text-center text-2xl font-bold">Previous rounds</h2>*/}
+      {/*  <div className="rounded-md border">*/}
+      {/*    <Table>*/}
+      {/*      <TableHeader>*/}
+      {/*        <TableRow>*/}
+      {/*          <TableHead>Id</TableHead>*/}
+      {/*          <TableHead>State</TableHead>*/}
+      {/*          <TableHead>Created at</TableHead>*/}
+      {/*          <TableHead>Winner</TableHead>*/}
+      {/*        </TableRow>*/}
+      {/*      </TableHeader>*/}
+      {/*      <TableBody>*/}
+      {/*        {allRounds.length ? (*/}
+      {/*          allRounds.map((row) => (*/}
+      {/*            <TableRow key={row.id}>*/}
+      {/*              <TableCell>{row.id}</TableCell>*/}
+      {/*              <TableCell className="uppercase">{row.state}</TableCell>*/}
+      {/*              <TableCell>{row.createdAt}</TableCell>*/}
+      {/*              <TableCell>{row.winnerName}</TableCell>*/}
+      {/*            </TableRow>*/}
+      {/*          ))*/}
+      {/*        ) : (*/}
+      {/*          <TableRow>*/}
+      {/*            <TableCell colSpan={3} className="h-24 text-center">*/}
+      {/*              No results.*/}
+      {/*            </TableCell>*/}
+      {/*          </TableRow>*/}
+      {/*        )}*/}
+      {/*      </TableBody>*/}
+      {/*    </Table>*/}
+      {/*  </div>*/}
+      {/*</div>*/}
     </main>
   );
 }

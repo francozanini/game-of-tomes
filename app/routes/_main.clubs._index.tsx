@@ -17,6 +17,7 @@ import {
 import invariant from "~/utils/invariant";
 import { currentUserOrRedirect } from "~/.server/auth/guards";
 import { Book, fetchBook } from "~/.server/google-books/api";
+import { useState } from "react";
 
 export async function loader(args: LoaderFunctionArgs) {
   const { userId } = await currentUserOrRedirect(args, "/clubs");
@@ -60,17 +61,36 @@ function CurrentlyReading(props: { book: Book | null }) {
   }
 
   return (
-    <div className="flex items-center">
-      <img
-        src={props.book.volumeInfo.imageLinks?.thumbnail}
-        alt={props.book.volumeInfo.title}
-        className="h-8 w-8 rounded-md"
-      />
-      <div className="ml-2">
-        <p className="font-semibold">{props.book.volumeInfo.title}</p>
-        <p className="text-sm text-gray-500">{props.book.volumeInfo.authors}</p>
-        <p>{props.book.volumeInfo.description}</p>
+    <div className="grid max-h-[300px] grid-cols-12 gap-4">
+      <div className="col-span-2 flex flex-col items-center gap-2">
+        <img
+          src={props.book.volumeInfo.imageLinks?.thumbnail}
+          alt={props.book.volumeInfo.title}
+          className="object-fit h-[300px] w-[200px] rounded-lg"
+        />
       </div>
+      <div className="col-span-10 flex max-h-[300px] flex-col overflow-y-auto">
+        <div>
+          <p className="font-semibold">{props.book.volumeInfo.title}</p>
+          <p className="text-sm text-gray-500">
+            {props.book.volumeInfo.authors}
+          </p>
+        </div>
+        <HtmlText text={props.book.volumeInfo.description} />
+      </div>
+    </div>
+  );
+}
+
+function HtmlText(props: { text: string }) {
+  return (
+    <div className="space-y-2">
+      <div
+        className="flex flex-col gap-2 text-sm text-gray-500"
+        dangerouslySetInnerHTML={{
+          __html: props.text,
+        }}
+      ></div>
     </div>
   );
 }
@@ -78,31 +98,36 @@ function CurrentlyReading(props: { book: Book | null }) {
 export default function Clubs() {
   const { clubs } = useLoaderData<typeof loader>();
   return (
-    <main className="container">
-      <div className="mt-2">
-        {clubs.map((club) => (
-          <Card key={club.id}>
-            <CardHeader>
-              <CardTitle>{club.name}</CardTitle>
-              <CardDescription>{club.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CurrentlyReading book={club.currentlyReading} />
-            </CardContent>
-            <CardFooter>
-              <Form method="post">
-                <input type="hidden" name="clubId" value={club.id} />
-                {!club.isMember && <Button type="submit">Join</Button>}
-              </Form>
-              {club.isMember && (
-                <Button>
-                  <Link to={`/clubs/${club.id}/manage`}>Details</Link>
-                </Button>
-              )}
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+    <main className="container mt-2 max-w-[1250px]">
+      {clubs.map((club) => (
+        <Card key={club.id}>
+          <CardHeader>
+            <CardTitle>{club.name}</CardTitle>
+            <CardDescription>{club.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CurrentlyReading book={club.currentlyReading} />
+          </CardContent>
+          <CardFooter>
+            <Form method="post">
+              <input type="hidden" name="clubId" value={club.id} />
+              {!club.isMember && <Button type="submit">Join</Button>}
+            </Form>
+            {club.isMember && (
+              <Button variant="link">
+                <Link to={`/clubs/${club.id}/manage`}>Manage</Link>
+              </Button>
+            )}
+            {club.currentlyReading && (
+              <Button variant="link">
+                <a href={club.currentlyReading.volumeInfo.previewLink}>
+                  Preview
+                </a>
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
+      ))}
     </main>
   );
 }

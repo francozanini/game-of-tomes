@@ -2,6 +2,7 @@ import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -15,13 +16,26 @@ import {
 } from "~/.server/model/clubs";
 import invariant from "~/utils/invariant";
 import { currentUserOrRedirect } from "~/.server/auth/guards";
+import { Book, fetchBook } from "~/.server/google-books/api";
 
 export async function loader(args: LoaderFunctionArgs) {
   const { userId } = await currentUserOrRedirect(args, "/clubs");
 
   const clubs = await findClubsAndComputeUserMembership(userId);
+  console.log(clubs);
 
-  return json({ clubs });
+  const clubsWithCurrentlyReading = await Promise.all(
+    clubs.map(async (club) => {
+      if (!club.currentlyReadingBookId) {
+        return { ...club, currentlyReading: null };
+      }
+
+      const book = await fetchBook(club.currentlyReadingBookId);
+      return { ...club, currentlyReading: book };
+    }),
+  );
+
+  return json({ clubs: clubsWithCurrentlyReading });
 }
 
 export async function action(args: ActionFunctionArgs) {
@@ -40,6 +54,27 @@ export async function action(args: ActionFunctionArgs) {
   return json({ message: "Joined club" });
 }
 
+function CurrentlyReading(props: { book: Book | null }) {
+  if (!props.book) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center">
+      <img
+        src={props.book.volumeInfo.imageLinks?.thumbnail}
+        alt={props.book.volumeInfo.title}
+        className="h-8 w-8 rounded-md"
+      />
+      <div className="ml-2">
+        <p className="font-semibold">{props.book.volumeInfo.title}</p>
+        <p className="text-sm text-gray-500">{props.book.volumeInfo.authors}</p>
+        <p>{props.book.volumeInfo.description}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Clubs() {
   const { clubs } = useLoaderData<typeof loader>();
   return (
@@ -51,6 +86,9 @@ export default function Clubs() {
               <CardTitle>{club.name}</CardTitle>
               <CardDescription>{club.description}</CardDescription>
             </CardHeader>
+            <CardContent>
+              <CurrentlyReading book={club.currentlyReading} />
+            </CardContent>
             <CardFooter>
               <Form method="post">
                 <input type="hidden" name="clubId" value={club.id} />

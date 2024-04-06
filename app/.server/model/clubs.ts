@@ -1,6 +1,11 @@
 import { db } from "~/.server/model/db";
 import { expressionBuilder } from "kysely";
-import { CLUBS, CLUB_MEMBERS, SELECTION_ROUNDS } from "./tables";
+import {
+  BOOK_SELECTIONS,
+  CLUB_MEMBERS,
+  CLUBS,
+  SELECTION_ROUNDS,
+} from "./tables";
 import { DB } from "kysely-codegen";
 
 function withIsMember(userId: string) {
@@ -26,7 +31,19 @@ export async function userIsMemberOfClub(userId: string, clubId: number) {
 export async function findClubsAndComputeUserMembership(userId: string) {
   return await db
     .selectFrom(CLUBS)
-    .select(["club.id", "club.name", "club.description", withIsMember(userId)])
+    .select((eb) => [
+      "club.id",
+      "club.name",
+      "club.description",
+      withIsMember(userId),
+      eb
+        .selectFrom(BOOK_SELECTIONS)
+        .select("bookSelection.bookId")
+        .where("bookSelection.clubId", "=", eb.ref("club.id"))
+        .orderBy("bookSelection.selectedAt", "desc")
+        .limit(1)
+        .as("currentlyReadingBookId"),
+    ])
     .execute();
 }
 

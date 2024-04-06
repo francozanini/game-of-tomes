@@ -4,9 +4,10 @@ import {
   SELECTION_ROUNDS,
   VOTES,
 } from "~/.server/model/tables";
-import { Transaction } from "kysely";
+import { ExpressionBuilder, Transaction } from "kysely";
 import { DB } from "kysely-codegen";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
+import { decideBookSelection } from "~/.server/model/bookSelections";
 
 export async function startOrAdvanceSelectionRound(clubId: number) {
   return db.transaction().execute(async (trx) => {
@@ -27,9 +28,13 @@ export async function startOrAdvanceSelectionRound(clubId: number) {
     }
 
     const nextState =
-      activeRound?.state === "suggesting" ? "voting" : "finished";
+      activeRound.state === "suggesting" ? "voting" : "finished";
 
-    return trx
+    if (nextState === "finished") {
+      await decideBookSelection(activeRound.votes, trx);
+    }
+
+    return await trx
       .updateTable(SELECTION_ROUNDS)
       .set({ state: nextState })
       .where("id", "=", activeRound.id)
@@ -85,7 +90,8 @@ export function hasRoundOnState(
 export function activeSelectionRound(clubId: number, trx?: Transaction<DB>) {
   return (trx ? trx : db)
     .selectFrom(SELECTION_ROUNDS)
-    .selectAll()
+    .selectAll(["selectionRound"])
+    .select((eb) => [withVotes(eb)])
     .where("clubId", "=", clubId)
     .where("state", "in", ["suggesting", "voting"])
     .orderBy("createdAt", "desc")
@@ -100,14 +106,18 @@ export function allRounds(clubId: number) {
       "state",
       "createdAt",
       "selectedBookId",
-      jsonArrayFrom(
-        eb
-          .selectFrom(VOTES)
-          .selectAll()
-          .whereRef("vote.votingRound", "=", "selectionRound.id"),
-      ).as("votes"),
+      withVotes(eb),
     ])
     .where("clubId", "=", clubId)
     .orderBy("createdAt", "desc")
     .execute();
+}
+
+function withVotes(eb: ExpressionBuilder<DB, "selectionRound">) {
+  return jsonArrayFrom(
+    eb
+      .selectFrom(VOTES)
+      .selectAll()
+      .whereRef("vote.votingRound", "=", "selectionRound.id"),
+  ).as("votes");
 }

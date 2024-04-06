@@ -30,7 +30,7 @@ import {
 } from "../../@/components/ui/table";
 import React from "react";
 import { fetchBook, fetchBooksByIds } from "~/.server/google-books/api";
-import { calculateWinner } from "~/.server/model/votes";
+import { solveRankedVoting } from "~/.server/model/votes";
 
 const loaderSchema = z.object({
   clubId: z.string().transform((val) => parseInt(val, 10)),
@@ -45,7 +45,7 @@ export async function loader(args: LoaderFunctionArgs) {
     const roundsWithWinners = [];
     for (const round of rounds) {
       if (round.state === "finished") {
-        const winner = calculateWinner(round.votes);
+        const winner = solveRankedVoting(round.votes);
         if (winner) {
           const book = await fetchBook(winner.bookId);
           roundsWithWinners.push({

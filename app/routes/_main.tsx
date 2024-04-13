@@ -25,6 +25,12 @@ export default function IndexLayout() {
             >
               Clubs
             </a>
+            <a
+              href="/settings"
+              className="text-sm font-semibold text-muted-foreground"
+            >
+              Settings
+            </a>
           </div>
           <div className="flex flex-row gap-2">
             <SignedIn>

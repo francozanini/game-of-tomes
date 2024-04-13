@@ -1,17 +1,27 @@
 import { ClerkApp } from "@clerk/remix";
 import { rootAuthLoader } from "@clerk/remix/ssr.server";
-import type { LoaderFunction } from "@remix-run/node";
+import { json, LoaderFunction } from "@remix-run/node";
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
 import styles from "~/globals.css?url";
-import { NonFlashOfWrongThemeEls, ThemeProvider, useTheme } from "~/theme";
+import {
+  NonFlashOfWrongThemeEls,
+  Theme,
+  ThemeProvider,
+  useTheme,
+} from "~/theme";
 import { clsx } from "clsx";
-import { Toaster } from "../@/components/ui/sonner";
+import { getToast } from "~/.server/primitives/toast";
+import { combineHeaders } from "~/.server/primitives/http";
+import { useToast } from "~/utils/toast";
+import { Toaster } from "~/components/sonner";
+import { ReactNode } from "react";
 
 export const links = () => {
   return [
@@ -22,12 +32,24 @@ export const links = () => {
 };
 
 export const loader: LoaderFunction = (args) =>
-  rootAuthLoader(args, { loadUser: true });
+  rootAuthLoader(
+    args,
+    async ({ request }) => {
+      const { toast, headers: toastHeaders } = await getToast(request);
+      return json({ toast }, { headers: combineHeaders(toastHeaders) });
+    },
+    { loadUser: true },
+  );
 
-function App() {
-  const [theme] = useTheme();
+function Document({
+  children,
+  theme,
+}: {
+  children: ReactNode;
+  theme: "dark" | "light" | "system";
+}) {
   return (
-    <html lang="en" className={clsx(theme)}>
+    <html lang="en" className={`${theme} h-full overflow-x-hidden`}>
       <head>
         <title>game.of.tomes</title>
         <meta charSet="utf-8" />
@@ -36,13 +58,29 @@ function App() {
         <Links />
         <NonFlashOfWrongThemeEls />
       </head>
-      <body className="h-screen min-h-screen">
-        <Outlet />
+      <body className="bg-background text-foreground">
+        {children}
         <ScrollRestoration />
         <Scripts />
-        <Toaster />
       </body>
     </html>
+  );
+}
+
+function App() {
+  const [theme] = useTheme();
+  const { toast } = useLoaderData<typeof loader>();
+  useToast(toast);
+
+  return (
+    <Document theme={theme ?? "dark"}>
+      <div className="flex h-screen flex-col justify-between">
+        <div className="flex-1">
+          <Outlet />
+        </div>
+        <Toaster closeButton position="bottom-right" theme={theme ?? "dark"} />
+      </div>
+    </Document>
   );
 }
 

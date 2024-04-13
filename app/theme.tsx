@@ -58,7 +58,7 @@ function useTheme() {
   if (context === undefined) {
     throw new Error("useTheme must be used within a Theme");
   }
-  return context;
+  return context || ["light"];
 }
 
 export { Theme, ThemeProvider, useTheme, NonFlashOfWrongThemeEls };

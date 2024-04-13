@@ -32,6 +32,7 @@ import { Reorder } from "framer-motion";
 import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
 import { findVotes, registerOrChangeVotes } from "~/.server/model/votes";
+import { createToastHeaders } from "~/.server/primitives/toast";
 
 async function validateClubMembershipAndVotableRound(
   args: ActionFunctionArgs,
@@ -119,10 +120,27 @@ export async function action(args: ActionFunctionArgs) {
   );
 
   if (persistedVotes.length !== votes.length) {
-    return json({ message: "Your votes could not be saved" });
+    return json(
+      { message: "Your votes could not be saved" },
+      {
+        headers: await createToastHeaders({
+          description: "Error updating votes",
+          type: "error",
+        }),
+        status: 400,
+      },
+    );
   }
 
-  return json({ message: "Your votes have been saved" });
+  return json(
+    { message: "Your votes have been saved" },
+    {
+      headers: await createToastHeaders({
+        description: "Votes updated successfully",
+        type: "success",
+      }),
+    },
+  );
 }
 
 function VotingCard({ book, rank }: { book: Book; rank: number }) {

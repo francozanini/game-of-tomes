@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { BOOK_SUGGESTIONS } from "./tables";
+import { BOOK_SUGGESTIONS } from "./tables/tableNames";
 
 type Suggestion = {
   bookId: string;

@@ -5,7 +5,7 @@ import {
   CLUB_MEMBERS,
   CLUBS,
   SELECTION_ROUNDS,
-} from "./tables";
+} from "./tables/tableNames";
 import { DB } from "kysely-codegen";
 
 function withIsMember(userId: string) {

@@ -19,16 +19,8 @@ import {
 } from "~/primitives/ui/card";
 import { invitationLink, InvitationLink } from "~/components/InvitationLink";
 import { SelectionRoundState } from "kysely-codegen";
-import { useReactTable } from "@tanstack/react-table";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/primitives/ui/table";
-import { fetchBook, fetchBooksByIds } from "~/.server/google-books/api";
+
+import { fetchBook } from "~/.server/google-books/api";
 import { solveRankedVoting } from "~/.server/model/votes";
 
 const loaderSchema = z.object({

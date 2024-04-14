@@ -1,5 +1,5 @@
 import { Kysely, sql } from "kysely";
-import { SELECTION_ROUNDS } from "~/.server/model/tables";
+import { SELECTION_ROUNDS } from "~/.server/model/tables/tableNames";
 import { DB } from "kysely-codegen";
 
 const roundStateTypeName = "selection_round_state";

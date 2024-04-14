@@ -1,5 +1,5 @@
 import { DB } from "kysely-codegen";
-import { BOOK_SELECTIONS } from "~/.server/model/tables";
+import { BOOK_SELECTIONS } from "~/.server/model/tables/tableNames";
 import { Kysely } from "kysely";
 
 const UniqueSelectionRoundAndBookClubConstraint =

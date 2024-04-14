@@ -4,7 +4,7 @@ import {
   BOOK_SELECTIONS,
   SELECTION_ROUNDS,
   VOTES,
-} from "~/.server/model/tables";
+} from "~/.server/model/tables/tableNames";
 import { solveRankedVoting } from "~/.server/model/votes";
 
 const selectionRoundIdColumn = "selectionRoundId";

@@ -4,7 +4,7 @@ import {
   BOOK_SUGGESTIONS,
   BOOKS,
   VOTES,
-} from "~/.server/model/tables";
+} from "~/.server/model/tables/tableNames";
 
 export async function up(kysely: Kysely<any>) {
   await kysely.schema

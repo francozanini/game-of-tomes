@@ -1,5 +1,5 @@
 import { Kysely, sql } from "kysely";
-import { USERS } from "../tables";
+import { USERS } from "../tables/tableNames";
 
 export async function up(kysely: Kysely<any>) {
   await kysely.schema

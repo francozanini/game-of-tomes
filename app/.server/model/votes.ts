@@ -1,5 +1,5 @@
 import { db } from "~/.server/model/db";
-import { VOTES } from "~/.server/model/tables";
+import { VOTES } from "~/.server/model/tables/tableNames";
 
 export function registerOrChangeVotes(
   votes: string[],

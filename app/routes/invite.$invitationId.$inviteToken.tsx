@@ -3,7 +3,11 @@ import { LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { currentUserOrRedirect } from "~/.server/auth/guards";
 import { joinClub } from "~/.server/model/clubs";
 import { db } from "~/.server/model/db";
-import { CLUB_MEMBERS, CLUBS, SELECTION_ROUNDS } from "~/.server/model/tables";
+import {
+  CLUB_MEMBERS,
+  CLUBS,
+  SELECTION_ROUNDS,
+} from "~/.server/model/tables/tableNames";
 import invariant from "~/utils/invariant";
 
 export async function loader(args: LoaderFunctionArgs) {

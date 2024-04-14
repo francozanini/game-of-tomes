@@ -3,7 +3,7 @@ import {
   BOOK_SUGGESTIONS,
   SELECTION_ROUNDS,
   VOTES,
-} from "~/.server/model/tables";
+} from "~/.server/model/tables/tableNames";
 import { ExpressionBuilder, Transaction } from "kysely";
 import { DB } from "kysely-codegen";
 import { jsonArrayFrom } from "kysely/helpers/postgres";

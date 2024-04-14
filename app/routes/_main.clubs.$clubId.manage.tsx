@@ -35,27 +35,6 @@ export async function loader(args: LoaderFunctionArgs) {
   const { clubId } = loaderSchema.parse(args.params);
 
   const currentRound = activeSelectionRound(clubId);
-  const allRoundsPromise = allRounds(clubId).then(async (rounds) => {
-    const roundsWithWinners = [];
-    for (const round of rounds) {
-      if (round.state === "finished") {
-        const winner = solveRankedVoting(round.votes);
-        if (winner) {
-          const book = await fetchBook(winner.bookId);
-          roundsWithWinners.push({
-            ...round,
-            winnerName: book.volumeInfo.title,
-          });
-        } else {
-          roundsWithWinners.push({ ...round, winnerName: "-" });
-        }
-      } else {
-        roundsWithWinners.push({ ...round, winnerName: "-" });
-      }
-    }
-
-    return roundsWithWinners;
-  });
 
   const clubAndMembership = await findClub(clubId, userId);
 
@@ -66,7 +45,6 @@ export async function loader(args: LoaderFunctionArgs) {
   return json({
     club: clubAndMembership,
     currentRound: await currentRound,
-    allRounds: await allRoundsPromise,
   });
 }
 
@@ -85,7 +63,7 @@ export async function action(args: ActionFunctionArgs) {
 }
 
 export default function Club() {
-  const { club, currentRound, allRounds } = useLoaderData<typeof loader>();
+  const { club, currentRound } = useLoaderData<typeof loader>();
   const invitation =
     useActionData<typeof action>()?.invitation ||
     (currentRound && {

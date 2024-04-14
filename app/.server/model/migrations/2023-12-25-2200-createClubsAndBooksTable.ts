@@ -7,7 +7,7 @@ import {
   CLUB_MEMBERS,
   USERS,
   VOTES,
-} from "../tables";
+} from "../tables/tableNames";
 
 export async function up(kysely: Kysely<any>) {
   await kysely.schema

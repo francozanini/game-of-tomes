@@ -1,5 +1,5 @@
 import { Kysely } from "kysely";
-import { CLUBS } from "../tables";
+import { CLUBS } from "../tables/tableNames";
 import { DB } from "kysely-codegen";
 
 export async function up(kysely: Kysely<DB>) {

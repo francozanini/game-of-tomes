@@ -1,5 +1,5 @@
 import { Kysely } from "kysely";
-import { BOOK_SUGGESTIONS, SELECTION_ROUNDS } from "../tables";
+import { BOOK_SUGGESTIONS, SELECTION_ROUNDS } from "../tables/tableNames";
 
 export async function up(kysely: Kysely<any>) {
   await kysely.schema

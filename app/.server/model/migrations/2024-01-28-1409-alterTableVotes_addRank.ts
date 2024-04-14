@@ -1,6 +1,6 @@
 import { Kysely } from "kysely";
 import { DB } from "kysely-codegen";
-import { VOTES } from "~/.server/model/tables";
+import { VOTES } from "~/.server/model/tables/tableNames";
 
 export async function up(kysely: Kysely<DB>) {
   await kysely.schema

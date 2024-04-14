@@ -2,7 +2,7 @@ import { DB, Vote } from "kysely-codegen";
 import { Transaction } from "kysely";
 import { solveRankedVoting } from "~/.server/model/votes";
 import { db } from "./db";
-import { BOOK_SELECTIONS } from "~/.server/model/tables";
+import { BOOK_SELECTIONS } from "~/.server/model/tables/tableNames";
 
 async function decideBookSelection(votes: Array<Vote>, trx?: Transaction<DB>) {
   const winner = solveRankedVoting(votes);

@@ -1,5 +1,5 @@
 import { Kysely } from "kysely";
-import { BOOK_SUGGESTIONS } from "~/.server/model/tables";
+import { BOOK_SUGGESTIONS } from "~/.server/model/tables/tableNames";
 
 const constraintName = "unique_suggestion_for_round";
 

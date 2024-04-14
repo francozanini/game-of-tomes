@@ -8,7 +8,7 @@ import {
   json,
   type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useSearchParams } from "@remix-run/react";
 import { Book, fetchBooks, fetchBooksByIds } from "~/.server/google-books/api";
 import { getAuth } from "@clerk/remix/ssr.server";
 import invariant from "~/utils/invariant";
@@ -21,7 +21,7 @@ import { BooksSearchResults, SearchBar } from "~/components/bookSearch";
 import { BookCardList } from "~/components/bookCard";
 import { NumericStringSchema } from "~/utils/types";
 import { SuggestBookInput } from "~/utils/suggestedBooks";
-import { emitBookSuggestion, emitter } from "~/.server/events/emitter";
+import { emitBookSuggestion } from "~/.server/events/emitter";
 import { useLiveLoader } from "~/utils/liveLoader";
 
 export async function loader(args: LoaderFunctionArgs) {

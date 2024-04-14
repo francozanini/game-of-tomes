@@ -19,6 +19,7 @@ async function decideBookSelection(votes: Array<Vote>, trx?: Transaction<DB>) {
       clubId: votes[0].clubId,
       bookId: winner.bookId,
       selectedAt: new Date(),
+      selectionRoundId: votes[0].votingRound,
     })
     .execute();
 }

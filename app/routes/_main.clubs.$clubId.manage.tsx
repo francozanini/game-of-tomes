@@ -1,6 +1,11 @@
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { findClub } from "~/.server/model/clubs";
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  useActionData,
+  useLoaderData,
+  useLocation,
+} from "@remix-run/react";
 import { Button } from "~/primitives/ui/button";
 import { zfd } from "zod-form-data";
 import { z } from "zod";
@@ -21,6 +26,7 @@ import {
   InvitationLink,
 } from "~/features/clubs/InvitationLink";
 import { SelectionRoundState } from "kysely-codegen";
+import { createToastHeaders } from "~/.server/primitives/toast";
 
 const loaderSchema = z.object({
   clubId: z.string().transform((val) => parseInt(val, 10)),
@@ -55,7 +61,14 @@ export async function action(args: ActionFunctionArgs) {
 
   const invitation = await startOrAdvanceSelectionRound(clubId);
 
-  return json({ invitation });
+  return json(
+    { invitation },
+    {
+      headers: await createToastHeaders({
+        description: "Round advanced!",
+      }),
+    },
+  );
 }
 
 function MoveToNextRoundStepForm(props: {
@@ -75,7 +88,6 @@ function MoveToNextRoundStepForm(props: {
     return (
       <Form method="post">
         <input type="hidden" name="clubId" value={props.clubId} />
-        <input type="datetime-local" name="votingEndsAt" />
         <Button type="submit">Start voting</Button>
       </Form>
     );

@@ -7,13 +7,13 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "../../@/components/ui/select";
+} from "~/primitives/ui/select";
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { db } from "~/.server/model/db";
 import { requireAuthenticated } from "~/.server/auth/guards";
-import { USERS } from "~/.server/model/tables";
-import { Label } from "../../@/components/ui/label";
-import { Button } from "../../@/components/ui/button";
+import { USERS } from "~/.server/model/tables/tableNames";
+import { Label } from "~/primitives/ui/label";
+import { Button } from "~/primitives/ui/button";
 import { zfd } from "zod-form-data";
 
 export async function loader(args: LoaderFunctionArgs) {

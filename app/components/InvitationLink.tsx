@@ -1,5 +1,4 @@
 import { Link } from "@remix-run/react";
-import { Button } from "../../@/components/ui/button";
 
 export function InvitationLink(props: { invitation: Invitation }) {
   return (

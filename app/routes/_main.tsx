@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "~/primitives/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "~/primitives/ui/dropdown-menu";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/remix";
 import { Outlet } from "@remix-run/react";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";

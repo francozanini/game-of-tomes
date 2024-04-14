@@ -5,11 +5,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../@/components/ui/card";
-import { Button } from "../../@/components/ui/button";
+} from "~/primitives/ui/card";
+import { Button } from "~/primitives/ui/button";
 import { Form, useNavigation } from "@remix-run/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Skeleton } from "../../@/components/ui/skeleton";
+import { Skeleton } from "~/primitives/ui/skeleton";
 import { SuggestBookInput } from "~/utils/suggestedBooks";
 
 function BookCard({

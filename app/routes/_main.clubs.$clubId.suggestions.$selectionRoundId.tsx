@@ -2,7 +2,7 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
+} from "~/primitives/ui/resizable";
 import {
   ActionFunctionArgs,
   json,

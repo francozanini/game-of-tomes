@@ -1,8 +1,8 @@
 import { Book } from "~/.server/google-books/api";
-import { Card } from "../../@/components/ui/card";
+import { Card } from "~/primitives/ui/card";
 import { Form, useNavigation } from "@remix-run/react";
-import { Button } from "../../@/components/ui/button";
-import { Input } from "../../@/components/ui/input";
+import { Button } from "~/primitives/ui/button";
+import { Input } from "~/primitives/ui/input";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { SkeletonList } from "~/components/skeleton";
 

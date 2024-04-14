@@ -20,13 +20,9 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-} from "../../@/components/ui/card";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "../../@/components/ui/avatar";
-import { Button } from "../../@/components/ui/button";
+} from "~/primitives/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "~/primitives/ui/avatar";
+import { Button } from "~/primitives/ui/button";
 import { useState } from "react";
 import { Reorder } from "framer-motion";
 import { withZod } from "@remix-validated-form/with-zod";

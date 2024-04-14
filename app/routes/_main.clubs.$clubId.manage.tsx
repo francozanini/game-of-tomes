@@ -1,7 +1,7 @@
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { findClub } from "~/.server/model/clubs";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { Button } from "@/components/ui/button";
+import { Button } from "~/primitives/ui/button";
 import { zfd } from "zod-form-data";
 import { z } from "zod";
 import {
@@ -16,7 +16,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../@/components/ui/card";
+} from "~/primitives/ui/card";
 import { invitationLink, InvitationLink } from "~/components/InvitationLink";
 import { SelectionRoundState } from "kysely-codegen";
 import { useReactTable } from "@tanstack/react-table";
@@ -27,8 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../@/components/ui/table";
-import React from "react";
+} from "~/primitives/ui/table";
 import { fetchBook, fetchBooksByIds } from "~/.server/google-books/api";
 import { solveRankedVoting } from "~/.server/model/votes";
 

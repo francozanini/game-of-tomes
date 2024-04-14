@@ -17,8 +17,11 @@ import {
   findSuggestedBooks,
   removeSuggestion,
 } from "~/.server/model/suggestions";
-import { BooksSearchResults, SearchBar } from "~/components/bookSearch";
-import { BookCardList } from "~/components/bookCard";
+import {
+  BooksSearchResults,
+  SearchBar,
+} from "~/features/books/suggestions/bookSearch";
+import { BookCardList } from "~/features/books/common/bookCard";
 import { NumericStringSchema } from "~/utils/types";
 import { SuggestBookInput } from "~/utils/suggestedBooks";
 import { emitBookSuggestion } from "~/.server/events/emitter";

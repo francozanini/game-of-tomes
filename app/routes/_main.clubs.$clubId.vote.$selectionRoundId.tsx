@@ -8,7 +8,7 @@ import { requireAuthenticated } from "~/.server/auth/guards";
 import { findClub } from "~/.server/model/clubs";
 import { findSelectionRound } from "~/.server/model/selectionRounds";
 import invariant from "~/utils/invariant";
-import { Book, fetchBooksByIds } from "~/.server/google-books/api";
+import { fetchBooksByIds } from "~/.server/google-books/api";
 import { Form, useLoaderData, useNavigation } from "@remix-run/react";
 import {
   Card,
@@ -16,7 +16,6 @@ import {
   CardFooter,
   CardHeader,
 } from "~/primitives/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "~/primitives/ui/avatar";
 import { Button } from "~/primitives/ui/button";
 import { useState } from "react";
 import { Reorder } from "framer-motion";
@@ -24,6 +23,7 @@ import { withZod } from "@remix-validated-form/with-zod";
 import { z } from "zod";
 import { findVotes, registerOrChangeVotes } from "~/.server/model/votes";
 import { createToastHeaders } from "~/.server/primitives/toast";
+import { VotingCard } from "../features/books/vote/VotingCard";
 
 async function validateClubMembershipAndVotableRound(
   args: ActionFunctionArgs,
@@ -131,41 +131,6 @@ export async function action(args: ActionFunctionArgs) {
         type: "success",
       }),
     },
-  );
-}
-
-function VotingCard({ book, rank }: { book: Book; rank: number }) {
-  const { volumeInfo } = book;
-  return (
-    <Card className="hover:border-gray-900">
-      <CardContent className="flex flex-row items-center justify-between p-4">
-        <Avatar className="h-[32px] w-[32px]">
-          <AvatarImage
-            className="object-cover"
-            src={
-              volumeInfo.imageLinks?.smallThumbnail ||
-              volumeInfo.imageLinks?.thumbnail ||
-              volumeInfo.imageLinks?.small ||
-              volumeInfo.imageLinks?.medium ||
-              volumeInfo.imageLinks?.large ||
-              volumeInfo.imageLinks?.extraLarge
-            }
-          />
-          <AvatarFallback>Cover</AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col">
-          <h3 className="break-all text-center text-xs font-bold">
-            {volumeInfo.title}
-          </h3>
-          <h4 className="text-center text-xs text-muted-foreground">
-            {volumeInfo.authors?.join(", ")}
-          </h4>
-        </div>
-        <Avatar className="h-[32px] w-[32px]">
-          <AvatarFallback>{rank}</AvatarFallback>
-        </Avatar>
-      </CardContent>
-    </Card>
   );
 }
 

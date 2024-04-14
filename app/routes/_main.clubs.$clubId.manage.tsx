@@ -6,7 +6,6 @@ import { zfd } from "zod-form-data";
 import { z } from "zod";
 import {
   activeSelectionRound,
-  allRounds,
   startOrAdvanceSelectionRound,
 } from "~/.server/model/selectionRounds";
 import { requireAuthenticated } from "~/.server/auth/guards";
@@ -59,6 +58,49 @@ export async function action(args: ActionFunctionArgs) {
   return json({ invitation });
 }
 
+function MoveToNextRoundStepForm(props: {
+  clubId: number;
+  currentRoundState: SelectionRoundState | null | undefined;
+}) {
+  const nextStep = nextRoundStep(props.currentRoundState);
+
+  if (nextStep === "suggesting") {
+    return (
+      <Form method="post">
+        <input type="hidden" name="clubId" value={props.clubId} />
+        <Button type="submit">Start suggestion round</Button>
+      </Form>
+    );
+  } else if (nextStep === "voting") {
+    return (
+      <Form method="post">
+        <input type="hidden" name="clubId" value={props.clubId} />
+        <input type="datetime-local" name="votingEndsAt" />
+        <Button type="submit">Start voting</Button>
+      </Form>
+    );
+  } else {
+    return (
+      <Form method="post">
+        <input type="hidden" name="clubId" value={props.clubId} />
+        <Button type="submit">Finish Voting</Button>
+      </Form>
+    );
+  }
+}
+
+function CopyToClipboardButton(props: { text: string }) {
+  function copyToClipboard() {
+    navigator.clipboard.writeText(props.text);
+  }
+
+  return (
+    <Button type="button" onClick={copyToClipboard}>
+      Copy to clipboard
+    </Button>
+  );
+}
+
 export default function Club() {
   const { club, currentRound } = useLoaderData<typeof loader>();
   const invitation =
@@ -68,16 +110,6 @@ export default function Club() {
       inviteToken: currentRound?.inviteToken,
       invitationId: currentRound?.id,
     });
-
-  function copyLinkToClipboard() {
-    if (invitation) {
-      navigator.clipboard.writeText(
-        `${location.origin}${invitationLink(invitation)}`,
-      );
-    }
-  }
-
-  const nextStep = nextRoundStep(currentRound?.state);
 
   return (
     <main className="container mt-2 space-y-8">
@@ -89,25 +121,14 @@ export default function Club() {
           {invitation && <InvitationLink invitation={invitation} />}
         </CardContent>
         <CardFooter className="flex gap-2">
-          <Form method="post">
-            <input type="hidden" name="clubId" value={club.id} />
-            <Button type="submit">
-              {nextStep === "suggesting"
-                ? "Start suggestion round"
-                : nextStep === "voting"
-                  ? "Start voting"
-                  : "Finish Voting"}
-            </Button>
-          </Form>
-
+          <MoveToNextRoundStepForm
+            clubId={club.id}
+            currentRoundState={currentRound?.state}
+          />
           {invitation && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={copyLinkToClipboard}
-            >
-              Copy link
-            </Button>
+            <CopyToClipboardButton
+              text={`${location.origin}${invitationLink(invitation)}`}
+            />
           )}
         </CardFooter>
       </Card>

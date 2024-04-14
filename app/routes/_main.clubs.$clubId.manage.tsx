@@ -1,11 +1,6 @@
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
 import { findClub } from "~/.server/model/clubs";
-import {
-  Form,
-  useActionData,
-  useLoaderData,
-  useLocation,
-} from "@remix-run/react";
+import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { Button } from "~/primitives/ui/button";
 import { zfd } from "zod-form-data";
 import { z } from "zod";

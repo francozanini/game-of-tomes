@@ -184,13 +184,12 @@ export default function Voting() {
   const { club, currentRound, votingOptions } = useLoaderData<typeof loader>();
   const [booksInVotingOrder, setBooksInVotingOrder] = useState(votingOptions);
   const { state: navigationState } = useNavigation();
-  const data = useActionData<typeof action>();
   const isSubmitting = navigationState === "submitting";
 
   return (
     <div className="container mt-4 space-y-4">
       <h1 className="text-center text-4xl font-bold">Make your vote</h1>
-      <h2 className="text-center">Choose {club.name}'s next book</h2>
+      <h2 className="text-center">Choose {club.name}&apos;s next book</h2>
       <div className="flex flex-row justify-center space-y-4">
         <Card className="max-w-lg">
           <CardHeader className="text-center">

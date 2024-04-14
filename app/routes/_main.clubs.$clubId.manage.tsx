@@ -17,7 +17,10 @@ import {
   CardHeader,
   CardTitle,
 } from "~/primitives/ui/card";
-import { invitationLink, InvitationLink } from "~/components/InvitationLink";
+import {
+  invitationLink,
+  InvitationLink,
+} from "~/features/clubs/InvitationLink";
 import { SelectionRoundState } from "kysely-codegen";
 
 import { fetchBook } from "~/.server/google-books/api";

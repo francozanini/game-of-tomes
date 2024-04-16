@@ -11,7 +11,7 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "~/primitives/ui",
+    "components": "~/primitives/",
     "utils": "~/primitives/lib/utils"
   }
 }

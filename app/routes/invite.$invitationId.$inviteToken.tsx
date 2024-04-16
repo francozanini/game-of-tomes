@@ -1,4 +1,3 @@
-import { getAuth } from "@clerk/remix/ssr.server";
 import { LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { currentUserOrRedirect } from "~/.server/auth/guards";
 import { joinClub } from "~/.server/model/clubs";
@@ -59,9 +58,9 @@ export async function loader(args: LoaderFunctionArgs) {
   }
 
   if (round.state === "suggesting") {
-    return redirect(`/clubs/${round.clubId}/suggestions/${round.id}`);
+    return redirect(`/suggestions/${round.clubId}/${round.id}`);
   } else if (round.state === "voting") {
-    return redirect(`/clubs/${round.clubId}/vote/${round.id}`);
+    return redirect(`/vote/${round.clubId}/${round.id}`);
   } else {
     throw new Error("Unknown state");
   }

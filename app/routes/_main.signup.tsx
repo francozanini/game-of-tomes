@@ -1,10 +1,9 @@
 import { SignUp } from "@clerk/remix";
-import { useParams } from "@remix-run/react";
+import { useRedirectUrl } from "~/utils/auth";
 
 export default function SignUpPage() {
-  const redirectUrl = useParams().redirectUrl || "/";
+  const redirectUrl = useRedirectUrl();
 
-  console.log("redirectUrl", redirectUrl);
   return (
     <div className="flex justify-center">
       <SignUp redirectUrl={redirectUrl} path="/signup" />

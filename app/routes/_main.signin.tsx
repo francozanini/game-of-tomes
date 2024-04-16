@@ -1,8 +1,8 @@
 import { SignIn } from "@clerk/remix";
-import { useParams } from "@remix-run/react";
+import { useRedirectUrl } from "~/utils/auth";
 
 export default function SignInPage() {
-  const redirectUrl = useParams().redirectUrl || "/";
+  const redirectUrl = useRedirectUrl();
 
   return (
     <div className="flex justify-center">

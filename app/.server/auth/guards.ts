@@ -16,8 +16,12 @@ export async function requireAuthenticated(
 
 export async function currentUserOrRedirect(
   args: LoaderFunctionArgs,
-  redirectPath: string,
+  redirectPath?: string | null | undefined,
 ) {
+  if (!redirectPath) {
+    redirectPath = new URL(args.request.url).pathname;
+    console.log("redirectPath", redirectPath);
+  }
   const fullRedirect = `/signin?redirect=${redirectPath}`;
 
   try {

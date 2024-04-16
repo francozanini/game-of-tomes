@@ -22,7 +22,6 @@ export async function loader(args: LoaderFunctionArgs) {
   const { userId } = await currentUserOrRedirect(args, "/clubs");
 
   const clubs = await findClubsAndComputeUserMembership(userId);
-  console.log(clubs);
 
   const clubsWithCurrentlyReading = await Promise.all(
     clubs.map(async (club) => {

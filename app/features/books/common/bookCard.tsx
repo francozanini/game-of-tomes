@@ -11,6 +11,35 @@ import { Form, useNavigation } from "@remix-run/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Skeleton } from "~/primitives/ui/skeleton";
 import { SuggestBookInput } from "~/utils/suggestedBooks";
+import { cn } from "../../../primitives/lib/utils";
+import {
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/primitives/ui/tooltip";
+import { Tooltip } from "@radix-ui/react-tooltip";
+
+function BookCardTitle({ title }: { title: string }) {
+  const maxTitleLength = 18;
+
+  if (title.length <= maxTitleLength) {
+    return <CardTitle className="word-break">{title}</CardTitle>;
+  }
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <CardTitle className="word-break">
+            {title.slice(0, maxTitleLength)}...
+          </CardTitle>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{title}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 function BookCard({
   book: { volumeInfo, id },
@@ -20,7 +49,7 @@ function BookCard({
   fading?: boolean;
 }) {
   return (
-    <Card className={fading ? "grayscale" : ""}>
+    <Card className={cn("flex w-[300px] flex-col", fading && "grayscale")}>
       <img
         src={
           volumeInfo.imageLinks?.thumbnail || "https://placeholder.co/128x194"
@@ -28,11 +57,11 @@ function BookCard({
         alt={volumeInfo.title}
         className="m-auto my-2"
       />
-      <CardHeader>
-        <CardTitle className={"word-break"}>{volumeInfo.title}</CardTitle>
+      <CardHeader className="flex-1 text-center">
+        <BookCardTitle title={volumeInfo.title} />
         <CardDescription>by {volumeInfo.authors?.join(", ")}</CardDescription>
       </CardHeader>
-      <CardFooter className="flex gap-2">
+      <CardFooter className="flex justify-center gap-2">
         <Button type="button" title="Preview" variant="secondary">
           <a
             href={volumeInfo.previewLink}

@@ -10,13 +10,8 @@ import {
   useLoaderData,
 } from "@remix-run/react";
 import styles from "~/globals.css?url";
-import {
-  NonFlashOfWrongThemeEls,
-  Theme,
-  ThemeProvider,
-  useTheme,
-} from "~/theme";
-import { clsx } from "clsx";
+import sonnerStyles from "~/sonner-styles.css?url";
+import { NonFlashOfWrongThemeEls, ThemeProvider, useTheme } from "~/theme";
 import { getToast } from "~/.server/primitives/toast";
 import { combineHeaders } from "~/.server/primitives/http";
 import { useToast } from "~/utils/toast";
@@ -28,6 +23,7 @@ export const links = () => {
     { rel: "icon", href: "/favicon.ico" },
     { rel: "stylesheet", href: "https://rsms.me/inter/inter.css" },
     { rel: "stylesheet", href: styles },
+    { rel: "stylesheet", href: sonnerStyles },
   ];
 };
 

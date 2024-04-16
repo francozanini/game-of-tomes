@@ -26,8 +26,11 @@ import { NumericStringSchema } from "~/utils/types";
 import { SuggestBookInput } from "~/utils/suggestedBooks";
 import { emitBookSuggestion } from "~/.server/events/emitter";
 import { useLiveLoader } from "~/utils/liveLoader";
+import { requireAuthenticated } from "~/.server/auth/guards";
 
 export async function loader(args: LoaderFunctionArgs) {
+  await requireAuthenticated(args);
+
   const { searchParams } = new URL(args.request.url);
   const searchTerm = searchParams.get("searchTerm");
   const clubId = args.params.clubId!;
